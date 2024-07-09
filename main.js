@@ -10,6 +10,7 @@ app.use(async (ctx) => {
         a: 1,
     };
     const b = 1;
+    console.log(b, 'main.ts::10行');
     console.log(obj, 'main.ts::9行');
     ctx.body = 'Hello,Koa!';
 });
