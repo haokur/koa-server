@@ -4,7 +4,9 @@
   "description": "koa应用",
   "main": "src/main.ts",
   "scripts": {
-    "start": "ts-node scripts/dev-server.ts"
+    "start": "ts-node scripts/dev-server.ts",
+    "build": "tsc",
+    "vercel-build": "tsc"
   },
   "keywords": [
     "koa2",
