@@ -5,11 +5,12 @@
   "main": "src/main.ts",
   "scripts": {
     "dev": "ts-node scripts/dev-server.ts",
-    "build": "tsc",
+    "spell-check": "cspell .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "start": "node dist/main.js",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build": "tsc"
   },
   "keywords": [
     "koa2",
@@ -27,6 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "chalk": "^5.3.0",
+    "cspell": "^8.10.4",
     "eslint": "^8.2.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^4.0.0",
