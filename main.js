@@ -6,12 +6,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const koa_1 = __importDefault(require("koa"));
 const app = new koa_1.default();
 app.use(async (ctx) => {
-    const obj = {
+    const test = {
         a: 1,
     };
     const b = 1;
     console.log(b, 'main.ts::10行');
-    console.log(obj, 'main.ts::9行');
+    console.log(test, 'main.ts::9行');
     ctx.body = 'Hello,Koa!';
 });
 app.listen(3000, () => {
