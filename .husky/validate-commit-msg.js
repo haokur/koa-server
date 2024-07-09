@@ -25,5 +25,12 @@ if (!gitTypeKeys.some((key) => commitMsgFile.startsWith(`${key}: `))) {
     console.log(`\n例如：\n\nfeat: ${commitMsgFile}\n\n- 完成登录页开发\n`);
     process.exit(1);
 } else {
+    fs.writeFile(commitMsgFile, newCommitMsg, 'utf8', (err) => {
+        if (err) {
+            console.error('Error writing commit message file:', err);
+            process.exit(1);
+        }
+        process.exit(0);
+    });
     process.exit(0);
 }
