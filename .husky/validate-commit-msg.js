@@ -1,3 +1,7 @@
+const fs = require('fs');
+
+console.log(process.env, 'validate-commit-msg.js:fs.writeFileSync(, newCommitMsg);:19行');
+
 // 仅验证第一行提交的开头
 const gitTypes = {
     feat: '新功能',
@@ -14,23 +18,23 @@ const gitTypes = {
 };
 const gitTypeKeys = Object.keys(gitTypes);
 
-const commitMsgFile = process.argv[2];
-if (!gitTypeKeys.some((key) => commitMsgFile.startsWith(`${key}: `))) {
+const commitMsg = process.argv[2];
+if (!gitTypeKeys.some((key) => commitMsg.startsWith(`${key}: `))) {
     console.error(
         `\n提交信息有误，请以${gitTypeKeys.join('，')}里面的一项开头，注意冒号后面的空格。\n`,
     );
     gitTypeKeys.forEach((key) => {
         console.log(`- ${key}，${gitTypes[key]}`);
     });
-    console.log(`\n例如：\n\nfeat: ${commitMsgFile}\n\n- 完成登录页开发\n`);
+    console.log(`\n例如：\n\nfeat: ${commitMsg}\n\n- 完成登录页开发\n`);
     process.exit(1);
 } else {
-    fs.writeFile(commitMsgFile, newCommitMsg, 'utf8', (err) => {
-        if (err) {
-            console.error('Error writing commit message file:', err);
-            process.exit(1);
-        }
-        process.exit(0);
-    });
+    try {
+        let newCommitMsg = `✨ ${commitMsg}`;
+        let msgFilePath = path.join(process.env.PWD, '.git/COMMIT_EDITMSG');
+        fs.writeFileSync(msgFilePath, newCommitMsg, 'utf8');
+    } catch (error) {
+        console.log(error, 'validate-commit-msg.js::56行');
+    }
     process.exit(0);
 }
