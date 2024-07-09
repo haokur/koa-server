@@ -38,11 +38,5 @@
   },
   "dependencies": {
     "koa": "^2.15.3"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint",
-      "commit-msg": "node ./.husky/validate-commit-msg.js"
-    }
   }
 }

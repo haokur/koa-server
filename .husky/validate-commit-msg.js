@@ -3,7 +3,7 @@ const { execSync } = require('child_process');
 
 const commitMsgFile = process.argv[2];
 
-console.log(commitMsgFile, 'validate-commit-msg.js::6行');
+console.log(process.argv, 'validate-commit-msg.js::6行');
 process.exit(1);
 // try {
 //     // 执行代码检查命令，比如运行 ESLint
