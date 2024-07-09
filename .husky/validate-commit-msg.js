@@ -1,23 +1,27 @@
-// 导入 Node.js 内置模块和依赖的外部模块
-const { execSync } = require('child_process');
+// 仅验证第一行提交的开头
+const gitTypes = {
+    feat: '新功能',
+    fix: '修复 bug',
+    docs: '仅文档更改',
+    style: '不影响代码含义的更改（空白、格式、缺少分号等）',
+    refactor: '既不修复 bug 也不添加功能的代码更改',
+    perf: '提高性能的代码更改',
+    test: '添加缺失的测试或更正现有的测试',
+    build: '影响构建系统或外部依赖的更改（例如：gulp、broccoli、npm）',
+    ci: '更改 CI 配置文件和脚本（例如：Travis、Circle、BrowserStack、SauceLabs）',
+    chore: '其他不修改 src 或 test 文件的更改',
+    revert: '撤销先前的提交',
+};
+const gitTypeKeys = Object.keys(gitTypes);
 
 const commitMsgFile = process.argv[2];
-
-console.log(process.argv, 'validate-commit-msg.js::6行');
-process.exit(1);
-// try {
-//     // 执行代码检查命令，比如运行 ESLint
-//     execSync('npm run lint');
-
-//     // 如果检查成功，则输出成功消息
-//     console.log('Lint check passed.');
-
-//     // 退出成功状态码
-//     process.exit(0);
-// } catch (error) {
-//     // 如果检查失败，则输出错误消息
-//     console.error('Lint check failed. Commit aborted.', error);
-
-//     // 退出失败状态码
-//     process.exit(1);
-// }
+if (!gitTypeKeys.some((key) => commitMsgFile.startsWith(`${key}: `))) {
+    console.error(`提交信息请以${gitTypeKeys.join('，')}里面的一项开头，注意冒号后面的空格。\n`);
+    gitTypeKeys.forEach((key) => {
+        console.log(`- ${key}，${gitTypes[key]}`);
+    });
+    console.log(`\n例如：\n\nfeat: ${commitMsgFile}\n\n- 完成登录页开发\n`);
+    process.exit(0);
+} else {
+    process.exit(1);
+}
