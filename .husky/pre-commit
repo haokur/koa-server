@@ -1,7 +1,5 @@
 #!/bin/sh
 
-. "$(dirname "$0")/_/husky.sh"
-
 # npm run lint
 
 # 只检测git add的文件
