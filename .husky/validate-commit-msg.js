@@ -16,12 +16,14 @@ const gitTypeKeys = Object.keys(gitTypes);
 
 const commitMsgFile = process.argv[2];
 if (!gitTypeKeys.some((key) => commitMsgFile.startsWith(`${key}: `))) {
-    console.error(`提交信息请以${gitTypeKeys.join('，')}里面的一项开头，注意冒号后面的空格。\n`);
+    console.error(
+        `\n提交信息有误，请以${gitTypeKeys.join('，')}里面的一项开头，注意冒号后面的空格。\n`,
+    );
     gitTypeKeys.forEach((key) => {
         console.log(`- ${key}，${gitTypes[key]}`);
     });
     console.log(`\n例如：\n\nfeat: ${commitMsgFile}\n\n- 完成登录页开发\n`);
-    process.exit(0);
-} else {
     process.exit(1);
+} else {
+    process.exit(0);
 }
