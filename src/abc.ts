@@ -3,3 +3,5 @@ function count(a: number, b: string) {
 }
 
 count(1, '1');
+
+console.log(111, 'abc.ts::7行');
