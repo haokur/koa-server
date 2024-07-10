@@ -2,11 +2,18 @@
   "compilerOptions": {
     "forceConsistentCasingInFileNames": true,
     "target": "ESNext",
-    "module": "CommonJS",
+    "module": "NodeNext",
     "rootDir": "src",
     "outDir": "dist",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    // "typeRoots": [
+    //   "./src/typings"
+    // ],
+    "types": [
+      "node",
+      "./src/typings/global.d.ts"
+    ]
   },
   "include": [
     "src/**/*"
