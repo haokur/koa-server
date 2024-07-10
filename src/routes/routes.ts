@@ -1,7 +1,9 @@
-import { userRoutes } from '../controllers/user.controller';
+import { FileRoutes } from '../controllers/file.controller';
+import { UserRoutes } from '../controllers/user.controller';
 
 const route: IKeyValueObject = {
-    ...userRoutes,
+    ...UserRoutes,
+    ...FileRoutes,
 };
 
 export default route;

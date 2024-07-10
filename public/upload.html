@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分片上传</title>
+</head>
+
+<body>
+    <input type="file" id="fileInput" placeholder="请选择文件">
+    <div id="step" onclick="handleUploadClick"></div>
+    <button onclick="uploadFile()">上传所有</button>
+    <script>
+        const chunkSize = 0.4 * 1024 * 1024 // 400K
+        const fileInput = document.getElementById('fileInput')
+
+        // 发送上传数据
+        const sendFileData = async (i) => {
+            const file = fileInput.files[0]
+            const totalChunks = Math.ceil(file.size / chunkSize)
+            const filename = file.name
+            const blob = getRangeDataByIndex(i)
+
+            const formData = new FormData()
+            formData.append('file', blob)
+
+            await fetch(`http://localhost:3000/file/upload?filename=${filename}&currentChunkIndex=${i}&totalChunkNum=${totalChunks}`, {
+                mode: 'no-cors',
+                method: "POST",
+                body: formData
+            })
+                .then(res => {
+                    console.log(res, "upload-split.html::33行");
+                })
+        }
+
+        // 根据索引获取数据段
+        const getRangeDataByIndex = (i) => {
+            const file = fileInput.files[0]
+
+            const start = i * chunkSize
+            const end = Math.min(start + chunkSize, file.size)
+            const blob = file.slice(start, end)
+
+            return blob
+        }
+
+        const handleFileChange = () => {
+            const file = fileInput.files[0]
+            const totalChunks = Math.ceil(file.size / chunkSize)
+
+            let btnHtml = ''
+            for (let i = 0; i < totalChunks; i++) {
+                btnHtml += `<button type="button" data-index="${i}">上传片段${i + 1}</button>`
+            }
+            document.getElementById('step').innerHTML = btnHtml
+        }
+
+        async function handleUploadClick(ev) {
+            if (!ev.target.dataset.index) {
+                return
+            }
+            i = +ev.target.dataset.index
+            sendFileData(i)
+        }
+
+        async function uploadFile() {
+            const file = fileInput.files[0]
+            const totalChunks = Math.ceil(file.size / chunkSize)
+            for (let i = 0; i < totalChunks; i++) {
+                sendFileData(i)
+            }
+        }
+
+        document.getElementById('step').addEventListener('click', handleUploadClick)
+        fileInput.addEventListener('change', handleFileChange)
+    </script>
+</body>
+
+</html>

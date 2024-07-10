@@ -2,6 +2,6 @@ export function GetUserList() {
     return [{ name: 'xxx', age: 18 }];
 }
 
-export const userRoutes = {
+export const UserRoutes = {
     '/user/list': GetUserList,
 };
