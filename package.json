@@ -4,12 +4,13 @@
   "description": "koa应用",
   "main": "src/main.ts",
   "scripts": {
-    "dev": "ts-node scripts/dev-server.ts",
+    "start": "concurrently \"npm run serve\" \"npm run client\"",
+    "serve": "ts-node scripts/dev-server.ts",
+    "client": "vite --config ./client/vite.config.ts",
+    "prepare": "husky",
     "spell-check": "cspell .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "start": "node dist/main.js",
-    "prepare": "husky",
     "build": "tsc"
   },
   "keywords": [
@@ -21,16 +22,21 @@
   "devDependencies": {
     "@haokur/cli": "^1.0.0",
     "@haokur/eslint-plugin": "^1.0.2",
+    "@types/concurrently": "^7.0.0",
     "@types/eslint-config-prettier": "^6.11.3",
     "@types/glob": "^8.1.0",
     "@types/koa": "^2.15.0",
     "@types/lint-staged": "^13.3.0",
     "@types/node": "^20.14.10",
     "@types/prettier": "^3.0.0",
+    "@types/sass": "^1.45.0",
     "@types/typescript": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
+    "@vitejs/plugin-vue": "^5.0.5",
+    "@vitejs/plugin-vue-jsx": "^4.0.0",
     "chalk": "^5.3.0",
+    "concurrently": "^8.2.2",
     "cspell": "^8.10.4",
     "eslint": "^8.2.0",
     "eslint-config-prettier": "^9.1.0",
@@ -41,12 +47,20 @@
     "nodemon": "^3.1.4",
     "prettier": "^3.3.2",
     "prettier-eslint": "^16.3.0",
+    "sass": "^1.77.7",
     "ts-node": "^10.9.2",
-    "typescript": "^5.1.6"
+    "typescript": "^5.1.6",
+    "vite": "^5.3.3"
   },
   "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/vue-router": "^2.0.0",
+    "axios": "^1.7.2",
+    "element-plus": "^2.7.6",
     "koa": "^2.15.3",
-    "koa-body": "^6.0.1"
+    "koa-body": "^6.0.1",
+    "vue": "^3.4.31",
+    "vue-router": "^4.4.0"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>分片下载</title>
+</head>
+
+<body>
+    <button id="download-btn">开始下载</button>
+    <script>
+        async function downloadFile(url, chunkSize = 1024 * 1024) {
+            const response = await fetch(url, { method: "HEAD" })
+            const contentLength = response.headers.get("Content-Length")
+            const totalSize = parseInt(contentLength, 10)
+
+            let downloadedSize = 0
+            const chunks = []
+
+            let n = 0
+            while (n < 8 && downloadedSize < totalSize) {
+                const end = Math.min(downloadedSize + chunkSize, totalSize) - 1
+                const chunk = await fetchChunk(url, downloadedSize, end)
+                chunks.push(chunk)
+                downloadedSize += chunk.byteLength
+
+                n++
+            }
+
+            const blob = new Blob(chunks)
+            const downloadUrl = URL.createObjectURL(blob)
+            const a = document.createElement('a')
+            a.href = downloadUrl
+            a.download = 'downloaded_file.zip'
+            document.body.appendChild(a)
+            a.click()
+            URL.revokeObjectURL(downloadUrl)
+        }
+
+        async function fetchChunk(url, start, end) {
+            const response = await fetch(url, {
+                headers: {
+                    "Range2": `bytes=${start}-${end}`
+                }
+            })
+            const arrayBuffer = await response.arrayBuffer();
+            return arrayBuffer
+        }
+
+        let downloadBtn = document.getElementById("download-btn")
+        downloadBtn.addEventListener("click", () => {
+            console.log("开始下载", "download.html::13行");
+            downloadFile('http://localhost:3000/')
+        })
+    </script>
+</body>
+
+</html>

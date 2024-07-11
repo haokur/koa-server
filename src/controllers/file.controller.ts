@@ -18,6 +18,12 @@ async function FileUpload(params, ctx) {
 
     await makeSureDirExist(fileDir);
 
+    await new Promise((resolve) => {
+        setTimeout(() => {
+            resolve(1);
+        }, 2000);
+    });
+
     const _localTempFilePath = path.resolve(fileDir, `${currentChunkIndex}.temp`);
     await writeFileByStream(tempFilePath, _localTempFilePath);
     if (!uploadFlags[filename]) {
@@ -35,9 +41,21 @@ async function FileUpload(params, ctx) {
 
         uploadFlags[filename].clear();
         fs.rmdirSync(fileDir, { recursive: true });
-        return 'file is finished';
+        return { status: 200, msg: 'finished' };
     } else {
-        return 'next';
+        return { status: 200, msg: 'next' };
+    }
+}
+
+/**获取上传结果的图片地址 */
+function FileGetUploadResult(params, ctx) {
+    const { fileName } = params;
+    const filePath = path.join(UPLOAD_DIR, `f${fileName}`);
+    console.log(fs.existsSync(filePath));
+    if (fs.existsSync(filePath)) {
+        ctx.body = fs.readFileSync(filePath);
+    } else {
+        ctx.status = 404;
     }
 }
 
@@ -48,4 +66,5 @@ function FileDownload(params, ctx) {
 export const FileRoutes = {
     '/file/upload': FileUpload,
     '/file/download': FileDownload,
+    '/file/upload-result': FileGetUploadResult,
 };
