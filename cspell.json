@@ -3,7 +3,8 @@
     "language": "en",
     "ignorePaths": [
         "node_modules/**",
-        "dist/**"
+        "dist/**",
+        "client/dist/**"
     ],
     "words": [
         "haokur"
