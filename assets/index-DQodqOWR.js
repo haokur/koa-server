@@ -1,1 +1,0 @@
-import{d as e,o as s,c as o,a as t,b as n}from"./index-D-vkZ_fR.js";const a={class:"index"},c=n("div",null,"this is index page",-1),_=[c],l=e({__name:"index",setup(d){return s(()=>{}),(i,r)=>(t(),o("div",a,_))}});export{l as default};
