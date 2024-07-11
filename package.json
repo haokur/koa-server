@@ -11,7 +11,8 @@
     "spell-check": "cspell .",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "build": "tsc"
+    "build": "vite build --config ./client/vite.config.ts",
+    "build:serve": "tsc"
   },
   "keywords": [
     "koa2",
