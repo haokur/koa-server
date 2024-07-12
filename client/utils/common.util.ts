@@ -10,14 +10,3 @@ export async function asyncForEach(arr, callback) {
         k++;
     }
 }
-
-export const CommonUtil = {
-    /**等待 */
-    async wait(duration) {
-        await new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(1);
-            }, duration);
-        });
-    },
-};

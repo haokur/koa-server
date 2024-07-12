@@ -13,5 +13,10 @@ export const router = createRouter({
             name: 'upload',
             component: () => import('../pages/upload/upload.vue'),
         },
+        {
+            path: '/download',
+            name: 'download',
+            component: () => import('../pages/download/download.vue'),
+        },
     ],
 });

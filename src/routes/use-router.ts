@@ -36,14 +36,18 @@ export const useRoutes = async (ctx: any) => {
         console.log('请求参数=>', JSON.stringify(queryObj));
         // 核心处理函数绑定
         const resBody: any = await routes[url](queryObj, ctx);
+
         if (typeof resBody === 'object') {
-            const { body, headers } = resBody;
-            if (typeof headers === 'object') {
-                Object.keys(headers).forEach((key) => {
-                    ctx.set(key, headers[key]);
-                });
+            const responseHeaders = resBody.headers || {};
+            Object.keys(responseHeaders).forEach((key) => {
+                ctx.set(key, responseHeaders[key]);
+            });
+            if (req.method === 'HEAD') {
+                ctx.status = resBody.statusCode || 200;
+            } else {
+                const responseData = resBody.body || resBody;
+                ctx.body = responseData;
             }
-            ctx.body = body || resBody;
         } else if (typeof resBody !== 'undefined') {
             ctx.body = resBody;
         }
