@@ -16,6 +16,8 @@ export class ConcurrentQueen {
     workQueenSet;
     canRun = true;
 
+    runFinishedPromise: any = null;
+
     constructor(allQueen, queenMax, callback) {
         this.allQueen = allQueen;
         this.allTaskQueen = allQueen.map(this.configureTask);
@@ -29,12 +31,16 @@ export class ConcurrentQueen {
         return { task: item, index };
     }
 
-    add(task, callback?) {
+    clear() {
+        this.allQueen = [];
+        this.allTaskQueen = [];
+        this.totalTask = 0;
+        this.workQueenSet = new Set();
+    }
+
+    add(task) {
         const _index = this.totalTask + 1;
         this.allTaskQueen.push(this.configureTask(task, _index));
-        if (callback) {
-            this.callback = callback;
-        }
     }
 
     stop() {
@@ -47,13 +53,20 @@ export class ConcurrentQueen {
     }
 
     run() {
-        return new Promise<void>((resolve, reject) => {
+        if (this.runFinishedPromise) return this.runFinishedPromise;
+        this.runFinishedPromise = new Promise<void>((resolve, reject) => {
             function _runQueen() {
                 if (!this.canRun) {
+                    setTimeout(() => {
+                        this.runFinishedPromise = null;
+                    }, 0);
                     return reject('中断执行');
                 }
                 // 当工作队列和所有任务队列为空时，返回结果
                 if (this.workQueenSet.size === 0 && this.allTaskQueen.length === 0) {
+                    setTimeout(() => {
+                        this.runFinishedPromise = null;
+                    }, 0);
                     return resolve();
                 }
                 const canDoNewTaskNum = this.queenMax - this.workQueenSet.size;

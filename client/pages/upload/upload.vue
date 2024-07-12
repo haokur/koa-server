@@ -33,6 +33,7 @@
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue';
 import axios from 'axios';
+import { ConcurrentQueen } from '../../utils/ConcurrentQueen';
 
 const chunkSize = 0.4 * 1024 * 1024; // 400K
 const inputRef: any = ref(null);
@@ -80,34 +81,6 @@ const handleFileChange = (ev) => {
     });
 };
 
-// 最多并发数量，在上次未完成前，不能再发，避免一次太多请求
-const ConcurrentMaxNum = 2;
-// 发送上传数据
-let workQueen: number[] = [];
-let waitQueen: number[] = [];
-
-const sendFileDataBySplitIndex = async (i) => {
-    let isNotValidIndex =
-        workQueen.includes(i) ||
-        waitQueen.includes(i) ||
-        currentUploadObj.finishedChunk === currentUploadObj.totalChunk;
-    if (isNotValidIndex) return;
-
-    waitQueen.push(i);
-    checkUploadQueen();
-};
-
-function checkUploadQueen() {
-    let canRunQueenNum = ConcurrentMaxNum - workQueen.length;
-    if (canRunQueenNum) {
-        let canRunIndexArr = waitQueen.splice(0, canRunQueenNum);
-        workQueen = [...workQueen, ...canRunIndexArr];
-        canRunIndexArr.forEach((item) => {
-            postFileData(item);
-        });
-    }
-}
-
 async function postFileData(i) {
     const blob = getRangeDataByIndex(i);
     let { fileName, totalChunk } = currentUploadObj;
@@ -117,14 +90,10 @@ async function postFileData(i) {
 
     await axios
         .post(
-            `http://localhost:3000/file/upload?filename=${fileName}&currentChunkIndex=${i}&totalChunkNum=${totalChunk}`,
+            `http://localhost:3000/file/upload?fileName=${fileName}&currentChunkIndex=${i}&totalChunkNum=${totalChunk}`,
             formData
         )
         .then((res) => {
-            // sendQueen弹出
-            workQueen = workQueen.filter((item) => item !== i);
-            checkUploadQueen();
-
             currentUploadObj.finishedChunk += 1;
             currentUploadObj.chunkPercentage = Math.floor(
                 (currentUploadObj.finishedChunk / currentUploadObj.totalChunk) * 100
@@ -147,10 +116,23 @@ const getRangeDataByIndex = (i) => {
     return blob;
 };
 
+// 最多并发数量，在上次未完成前，不能再发，避免一次太多请求
+const ConcurrentMaxNum = 2;
+const conQueen = new ConcurrentQueen([], ConcurrentMaxNum, async (taskItem) => {
+    let { task } = taskItem;
+    await postFileData(task.index);
+});
+
+const sendFileDataBySplitIndex = async (i) => {
+    conQueen.add(currentUploadObj.chunkStatus[i]);
+    await conQueen.start();
+};
+
 async function uploadAllIndex() {
     for (let i = 0; i < currentUploadObj.totalChunk; i++) {
-        sendFileDataBySplitIndex(i);
+        conQueen.add(currentUploadObj.chunkStatus[i]);
     }
+    await conQueen.start();
 }
 </script>
 <style lang="scss" scoped>
