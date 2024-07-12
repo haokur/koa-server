@@ -6,8 +6,8 @@
 </template>
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
-import { asyncForEach } from '../../utils/common.util';
 import axios from 'axios';
+import { ConcurrentQueen } from '../../utils/ConcurrentQueen';
 
 const ChunkSize = Math.floor(0.4 * 1024 * 1024);
 const fileName = ref('f1708607957313.png');
@@ -70,10 +70,26 @@ async function downloadFile(url) {
     }
 
     // 开始按段请求下载
-    await asyncForEach(currentDownloadObj.chunkRanges, async (item, index) => {
-        const chunk = await fetchChunk(url, item.start, item.end);
-        currentDownloadObj.chunkRangeData[index] = chunk;
-    });
+    const maxConcurrent = 2;
+    const conQueen = new ConcurrentQueen(
+        currentDownloadObj.chunkRanges,
+        maxConcurrent,
+        async (taskItem) => {
+            let { task, index } = taskItem;
+            const chunk = await fetchChunk(url, task.start, task.end);
+            currentDownloadObj.chunkRangeData[index] = chunk;
+        }
+    );
+    await conQueen.start();
+    // await concurrentRun(currentDownloadObj.chunkRanges, maxConcurrent, async (taskItem) => {
+    //     let { task, index } = taskItem;
+    //     const chunk = await fetchChunk(url, task.start, task.end);
+    //     currentDownloadObj.chunkRangeData[index] = chunk;
+    // });
+    // await asyncForEach(currentDownloadObj.chunkRanges, async (item, index) => {
+    //     const chunk = await fetchChunk(url, item.start, item.end);
+    //     currentDownloadObj.chunkRangeData[index] = chunk;
+    // });
 
     // 拼接下载后的数据
     const fileBufferData = currentDownloadObj.chunkRangeData.reduce(
