@@ -30,15 +30,24 @@
         <div>
             {{ currentUploadObj }}
         </div>
+
+        <div>
+            <h3>上传组件</h3>
+            <UploadControl v-model:imgList="imgList"></UploadControl>
+        </div>
     </div>
 </template>
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue';
 import axios from 'axios';
+
+import UploadControl from '../../components/UploadControl.vue';
 import { AsyncQueue } from '../../utils/AsyncQueue';
 
 const chunkSize = 0.4 * 1024 * 1024; // 400K
 const inputRef: any = ref(null);
+const imgList = ref([]);
+
 // 当前上传的对象
 const currentUploadObj = reactive<{
     chunkSize: number;

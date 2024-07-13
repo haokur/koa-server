@@ -13,7 +13,8 @@
     // ],
     "types": [
       "node",
-      "./src/typings/global.d.ts"
+      "./src/typings/global.d.ts",
+      "./client/typings/global.d.ts"
     ]
   },
   "include": [

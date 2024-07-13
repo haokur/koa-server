@@ -49,13 +49,12 @@ const downloadFileByUrl = () => {
         });
     }
 
-    const url = `http://localhost:3000/file/download?fileName=${fileName.value}`;
+    const url = `${$env.baseUrl}/file/download?fileName=${fileName.value}`;
 
     downloadFile(url);
 };
 
 async function allDownloadCallback() {
-    console.log(currentDownloadObj, 'download.vue::56行');
     // 拼接下载后的数据
     const fileBufferData = currentDownloadObj.chunkRangeData.reduce(
         (prev: ArrayBuffer[], current: ArrayBuffer) => {
@@ -104,8 +103,6 @@ async function setDownloadInfo(url) {
 }
 
 async function downloadFile(url) {
-    console.log(url, currentDownloadObj.fileUrl, 'download.vue::104行');
-
     if (url !== currentDownloadObj.fileUrl) {
         conQueue.clear();
         currentDownloadObj.fileUrl = url;
