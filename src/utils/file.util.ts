@@ -72,7 +72,7 @@ export async function readFileByStream(filePath) {
 export async function makeSureDirExist(dirPath) {
     return new Promise<void>((resolve) => {
         if (!fs.existsSync(dirPath)) {
-            mkdir(dirPath).then(resolve);
+            mkdir(dirPath).then(resolve).catch(resolve);
         } else {
             resolve();
         }

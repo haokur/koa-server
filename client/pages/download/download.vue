@@ -7,12 +7,13 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import axios from 'axios';
-import { ConcurrentQueen } from '../../utils/ConcurrentQueen';
+import { AsyncQueue } from '../../utils/AsyncQueue';
 
 const ChunkSize = Math.floor(0.4 * 1024 * 1024);
 const fileName = ref('f1708607957313.png');
 const currentDownloadObj = reactive<{
     fileName: string;
+    fileUrl: string;
     fileRemoteUrl: string;
     /**整个文件的大小 */
     totalFileSize: number;
@@ -22,10 +23,12 @@ const currentDownloadObj = reactive<{
         end: number;
         /**0未下载，1下载中，2下载已完成 */
         status: 0 | 1 | 2;
+        index: number;
     }[];
     chunkRangeData: ArrayBuffer[];
 }>({
     fileName: '',
+    fileUrl: '',
     fileRemoteUrl: '',
     totalFileSize: 0,
     chunkSize: ChunkSize,
@@ -35,62 +38,24 @@ const currentDownloadObj = reactive<{
 
 const downloadFileByUrl = () => {
     if (!fileName.value) return;
-    Object.assign(currentDownloadObj, {
-        fileName: fileName.value,
-        fileRemoteUrl: '',
-        totalFileSize: 0,
-        chunkSize: ChunkSize,
-        chunkRanges: [],
-        chunkRangeData: [],
-    });
+    if (fileName.value !== currentDownloadObj.fileName) {
+        Object.assign(currentDownloadObj, {
+            fileName: fileName.value,
+            fileRemoteUrl: '',
+            totalFileSize: 0,
+            chunkSize: ChunkSize,
+            chunkRanges: [],
+            chunkRangeData: [],
+        });
+    }
 
     const url = `http://localhost:3000/file/download?fileName=${fileName.value}`;
 
     downloadFile(url);
 };
 
-async function downloadFile(url) {
-    // 先试用HEAD方式仅获取文件大小
-    const response = await axios.head(url);
-    const contentLength: any = response.headers['content-length'] || '0';
-    const totalSize = parseInt(contentLength);
-    currentDownloadObj.totalFileSize = totalSize;
-
-    // 按size和chunkSize进行分段
-    let prevEndSize = -1;
-    while (prevEndSize < totalSize) {
-        const startSizeIndex = prevEndSize + 1;
-        const endSizeIndex = prevEndSize + currentDownloadObj.chunkSize;
-        currentDownloadObj.chunkRanges.push({
-            start: startSizeIndex,
-            end: endSizeIndex,
-            status: 0,
-        });
-        prevEndSize = endSizeIndex;
-    }
-
-    // 开始按段请求下载
-    const maxConcurrent = 2;
-    const conQueen = new ConcurrentQueen(
-        currentDownloadObj.chunkRanges,
-        maxConcurrent,
-        async (taskItem) => {
-            let { task, index } = taskItem;
-            const chunk = await fetchChunk(url, task.start, task.end);
-            currentDownloadObj.chunkRangeData[index] = chunk;
-        }
-    );
-    await conQueen.start();
-    // await concurrentRun(currentDownloadObj.chunkRanges, maxConcurrent, async (taskItem) => {
-    //     let { task, index } = taskItem;
-    //     const chunk = await fetchChunk(url, task.start, task.end);
-    //     currentDownloadObj.chunkRangeData[index] = chunk;
-    // });
-    // await asyncForEach(currentDownloadObj.chunkRanges, async (item, index) => {
-    //     const chunk = await fetchChunk(url, item.start, item.end);
-    //     currentDownloadObj.chunkRangeData[index] = chunk;
-    // });
-
+async function allDownloadCallback() {
+    console.log(currentDownloadObj, 'download.vue::56行');
     // 拼接下载后的数据
     const fileBufferData = currentDownloadObj.chunkRangeData.reduce(
         (prev: ArrayBuffer[], current: ArrayBuffer) => {
@@ -107,6 +72,53 @@ async function downloadFile(url) {
     document.body.appendChild(a);
     a.click();
     URL.revokeObjectURL(downloadUrl);
+}
+
+// 开始按段请求下载
+const maxConcurrent = 2;
+const conQueue = new AsyncQueue(maxConcurrent, true);
+conQueue.finishCallback = allDownloadCallback;
+
+async function setDownloadInfo(url) {
+    // 先试用HEAD方式仅获取文件大小
+    const response = await axios.head(url);
+    const contentLength: any = response.headers['content-length'] || '0';
+    const totalSize = parseInt(contentLength);
+    currentDownloadObj.totalFileSize = totalSize;
+
+    // 按size和chunkSize进行分段
+    let prevEndSize = -1;
+    let index = 0;
+    while (prevEndSize < totalSize) {
+        const startSizeIndex = prevEndSize + 1;
+        const endSizeIndex = prevEndSize + currentDownloadObj.chunkSize;
+        currentDownloadObj.chunkRanges.push({
+            start: startSizeIndex,
+            end: endSizeIndex,
+            status: 0,
+            index,
+        });
+        prevEndSize = endSizeIndex;
+        index++;
+    }
+}
+
+async function downloadFile(url) {
+    console.log(url, currentDownloadObj.fileUrl, 'download.vue::104行');
+
+    if (url !== currentDownloadObj.fileUrl) {
+        conQueue.clear();
+        currentDownloadObj.fileUrl = url;
+        await setDownloadInfo(url);
+    }
+
+    const queueCallback = async (taskItem) => {
+        let { index, start, end } = taskItem;
+        const chunk = await fetchChunk(url, start, end);
+        currentDownloadObj.chunkRangeData[index] = chunk;
+    };
+    conQueue.addManyTask(currentDownloadObj.chunkRanges, queueCallback);
+    conQueue.run();
 }
 
 // 按分段数据拼接

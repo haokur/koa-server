@@ -17,6 +17,8 @@
 
         <div class="upload-all" v-if="controlVisible">
             <el-button type="primary" @click="uploadAllIndex">全部片段上传</el-button>
+            <el-button type="primary" @click="pauseUpload">中断上传</el-button>
+            <el-button type="primary" @click="continueUpload">继续上传</el-button>
         </div>
 
         <img
@@ -33,7 +35,7 @@
 <script lang="ts" setup>
 import { computed, reactive, ref } from 'vue';
 import axios from 'axios';
-import { ConcurrentQueen } from '../../utils/ConcurrentQueen';
+import { AsyncQueue } from '../../utils/AsyncQueue';
 
 const chunkSize = 0.4 * 1024 * 1024; // 400K
 const inputRef: any = ref(null);
@@ -118,22 +120,28 @@ const getRangeDataByIndex = (i) => {
 
 // 最多并发数量，在上次未完成前，不能再发，避免一次太多请求
 const ConcurrentMaxNum = 2;
-const conQueen = new ConcurrentQueen([], ConcurrentMaxNum, async (taskItem) => {
-    let { task } = taskItem;
-    await postFileData(task.index);
-});
+const asyncQueue = new AsyncQueue(ConcurrentMaxNum, true);
+const queueCallback = async (taskItem) => {
+    await postFileData(taskItem.index);
+};
 
 const sendFileDataBySplitIndex = async (i) => {
-    conQueen.add(currentUploadObj.chunkStatus[i]);
-    await conQueen.start();
+    asyncQueue.addTask(currentUploadObj.chunkStatus[i], queueCallback);
+    asyncQueue.run();
 };
 
 async function uploadAllIndex() {
-    for (let i = 0; i < currentUploadObj.totalChunk; i++) {
-        conQueen.add(currentUploadObj.chunkStatus[i]);
-    }
-    await conQueen.start();
+    asyncQueue.addManyTask(currentUploadObj.chunkStatus, queueCallback);
+    asyncQueue.run();
 }
+
+const pauseUpload = () => {
+    asyncQueue.pause();
+};
+
+const continueUpload = () => {
+    asyncQueue.run();
+};
 </script>
 <style lang="scss" scoped>
 .upload {
