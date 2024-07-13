@@ -79,7 +79,11 @@ export class AsyncQueue {
         });
     }
 
-    /**一次添加多个任务 */
+    /**
+     * 一次添加多个任务
+     * @param taskList 任务列表
+     * @param callback 单个任务执行时的函数回调
+     */
     addManyTask(taskList, callback) {
         taskList.forEach((task) => {
             this.addTask(task, callback);

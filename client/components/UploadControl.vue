@@ -8,8 +8,21 @@
             :disabled="isLoading"
             @change="handleFilesChange"
         />
-        <label v-loading="isLoading" :for="cptId" class="img-label" ref="multiUploadLabelRef">
-            <slot></slot>
+        <label :for="cptId" class="img-label" ref="multiUploadLabelRef">
+            <slot>
+                <div class="progress-loading">
+                    <div class="progress-mask" v-loading="isLoading"></div>
+                    <div class="progress-content">
+                        <el-progress
+                            v-if="progress"
+                            type="circle"
+                            :width="60"
+                            :status="`${progress === 100 ? 'success' : ''}`"
+                            :percentage="progress"
+                        />
+                    </div>
+                </div>
+            </slot>
         </label>
         <div class="img-list">
             <div class="img-item" v-for="(item, index) in imgList" :key="index">
@@ -19,9 +32,10 @@
     </div>
 </template>
 <script lang="tsx" setup>
-import { PropType, onMounted, ref } from 'vue';
+import { PropType, computed, onMounted, ref } from 'vue';
 import { getRandomStr } from '../utils/common.util';
-import { useUpload } from '../hooks/upload.hook';
+import { AsyncQueue } from '../utils/AsyncQueue';
+import { FileUploader, ICurrentUploadObj } from '../classes/FileUploader';
 
 interface IImgItem {
     imgUrl: string;
@@ -33,10 +47,20 @@ const props = defineProps({
             return [];
         },
     },
+    /**并发几个文件 */
+    concurrentFileNum: { type: Number, default: 2 },
+    /**单个文件并发多少个分片 */
+    fileConcurrentChunkNum: { type: Number, default: 2 },
     bizId: { type: String, default: '' },
 });
 
 const isLoading = ref(false);
+const newImgList = ref<string[]>([]);
+const fileList = ref<any[]>([]);
+const progress = computed(() => {
+    if (!fileList.value.length) return 0;
+    return Math.floor((newImgList.value.length / fileList.value.length) * 100);
+});
 
 const cptId = ref('');
 onMounted(() => {
@@ -57,33 +81,36 @@ function handleFilesChange(ev) {
     submitUpload(files);
 }
 
-const emits = defineEmits(['success', 'update:imgList']);
-function submitUpload(fileList) {
-    Promise.all(fileList.map((item) => uploadItem(item)))
-        .then((res) => {
-            emits('update:imgList', res);
-            emits('success', res);
-            isLoading.value = false;
-            console.log('全部列表回调', res, props.imgList, 'UploadControl.vue::65行');
-        })
-        .catch((err) => {
-            console.log(err, 'MultiUpload.vue::23行');
+// 分片上传单个文件
+async function uploadItem(fileItem) {
+    return new Promise((resolve) => {
+        const fileUploader = new FileUploader(fileItem, props.fileConcurrentChunkNum);
+        fileUploader.enqueue(null, (uploadObj: ICurrentUploadObj) => {
+            let currentItem = { imgUrl: uploadObj.remoteFileUrl };
+            resolve(currentItem);
         });
+        fileUploader.start();
+    });
 }
 
-const { progress, remoteUrl, initUpload, startUpload, pauseUpload } = useUpload(2);
-
-// 上传图片
-function uploadItem(fileItem) {
-    return new Promise((resolve) => {
-        initUpload(fileItem, () => {
-            resolve({
-                imgUrl: remoteUrl.value,
-                originName: fileItem.name,
-            });
-        });
-        startUpload();
+const emits = defineEmits(['success', 'update:imgList']);
+function submitUpload(fileArr) {
+    fileList.value = fileArr;
+    const ChannelQueue = new AsyncQueue(props.fileConcurrentChunkNum);
+    ChannelQueue.addManyTask(fileArr, async (queueItem) => {
+        const uploadResult = await uploadItem(queueItem);
+        emits('update:imgList', [...props.imgList, uploadResult]);
+        emits('success', uploadResult);
+        newImgList.value.push('');
     });
+    ChannelQueue.finishCallback = () => {
+        setTimeout(() => {
+            isLoading.value = false;
+            newImgList.value = [];
+            fileList.value = [];
+        }, 2000);
+    };
+    ChannelQueue.run();
 }
 </script>
 
@@ -151,6 +178,24 @@ function uploadItem(fileItem) {
             max-width: 100%;
             max-height: 100%;
         }
+    }
+}
+.progress {
+    &-mask {
+        width: 100%;
+        height: 100px;
+    }
+    &-content {
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(255, 255, 255, 0.6);
+        z-index: 99999;
     }
 }
 </style>
