@@ -89,8 +89,10 @@ async function uploadItem(fileItem: File) {
         const fileUploader = new FileUploader(fileItem, props.fileConcurrentChunkNum);
         await fileUploader.enqueue(null, (uploadObj: ICurrentUploadObj) => {
             let currentItem = { imgUrl: uploadObj.remoteFileUrl };
+            console.log("成功回调","UploadControl.vue::92行");
             resolve(currentItem);
         });
+        console.log('单个文件添加队列完成', 'UploadControl.vue::94行');
         fileUploader.start();
     });
 }
