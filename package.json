@@ -12,7 +12,9 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "build": "vite build --config ./client/vite.config.ts",
-    "build:serve": "tsc"
+    "build:serve": "tsc",
+    "preview:serve": "node ./dist/main.js",
+    "pm2:serve": "pm2 start npm --name koa-server-8666 -- run preview:serve"
   },
   "keywords": [
     "koa2",
