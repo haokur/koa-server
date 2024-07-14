@@ -6,6 +6,19 @@ import { CommonUtil } from '../utils/common.util';
 
 // 上传标识
 const uploadFlags = {};
+
+export async function FileExist(params) {
+    const { md5, ext } = params;
+    let resultFilePath = path.join(UPLOAD_DIR, md5);
+    resultFilePath += ext ? `.${ext}` : '';
+    const isExist = fs.existsSync(resultFilePath);
+    return {
+        headers: {
+            'Content-Length': isExist ? 1 : 0,
+        },
+    };
+}
+
 /**
  * 图片分片上传
  */
@@ -16,14 +29,20 @@ interface IFileUploadParams {
     totalChunkNum: number;
     /**当前分片索引，从0开始 */
     currentChunkIndex: number;
+    /**文件md5值 */
+    md5?: string;
+    /**文件扩展名 */
+    ext?: string;
 }
 async function FileUpload(params: IFileUploadParams, ctx: IKoaContext) {
     const fieldName = 'file';
     const file = ctx.request.files[fieldName];
 
     const tempFilePath = file.filepath;
-    const { fileName, totalChunkNum, currentChunkIndex } = params;
-    const fileDir = path.join(UPLOAD_DIR, fileName);
+    const { fileName, totalChunkNum, currentChunkIndex, md5, ext } = params;
+
+    const resultName = md5 || fileName;
+    const fileDir = path.join(UPLOAD_DIR, `temp_${resultName}`);
 
     await makeSureDirExist(fileDir);
 
@@ -31,24 +50,32 @@ async function FileUpload(params: IFileUploadParams, ctx: IKoaContext) {
 
     const _localTempFilePath = path.resolve(fileDir, `${currentChunkIndex}.temp`);
     await writeFileByStream(tempFilePath, _localTempFilePath);
-    if (!uploadFlags[fileName]) {
-        uploadFlags[fileName] = new Set();
+    if (!uploadFlags[resultName]) {
+        uploadFlags[resultName] = new Set();
     }
-    uploadFlags[fileName].add(_localTempFilePath);
-    const isLastChunk = uploadFlags[fileName].size === +totalChunkNum;
+    uploadFlags[resultName].add(_localTempFilePath);
+    const isLastChunk = uploadFlags[resultName].size === +totalChunkNum;
     if (isLastChunk) {
-        const filePath = path.join(UPLOAD_DIR, 'f' + fileName);
+        const filePath = md5
+            ? path.join(UPLOAD_DIR, `${md5}.${ext}`)
+            : path.join(UPLOAD_DIR, fileName);
         const debrisPaths: string[] = [];
         for (let i = 0; i < totalChunkNum; i++) {
             debrisPaths.push(path.resolve(fileDir, `${i}.temp`));
         }
         await combineFileByDebris(debrisPaths, filePath);
 
-        uploadFlags[fileName].clear();
+        uploadFlags[resultName].clear();
         fs.rmdirSync(fileDir, { recursive: true });
-        return { status: 200, msg: 'finished' };
+        return {
+            status: 200,
+            msg: 'finished',
+            data: {
+                url: filePath.replace(process.cwd(), ''),
+            },
+        };
     } else {
-        return { status: 200, msg: 'next' };
+        return { status: 200, msg: 'next', data: null };
     }
 }
 
@@ -59,7 +86,7 @@ interface IFileGetUploadResultParams {
 }
 function FileGetUploadResult(params: IFileGetUploadResultParams, ctx: IKoaContext) {
     const { fileName } = params;
-    const filePath = path.join(UPLOAD_DIR, `f${fileName}`);
+    const filePath = path.join(UPLOAD_DIR, fileName);
     if (fs.existsSync(filePath)) {
         ctx.body = fs.readFileSync(filePath);
     } else {
@@ -107,6 +134,7 @@ async function FileDownload(params: IKeyValueObject, ctx: IKoaContext) {
 }
 
 export const FileRoutes = {
+    '/file/exist': FileExist,
     '/file/upload': FileUpload,
     '/file/download': FileDownload,
     '/file/upload-result': FileGetUploadResult,

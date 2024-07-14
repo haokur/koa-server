@@ -34,7 +34,7 @@
 <script lang="tsx" setup>
 import { PropType, computed, onMounted, ref } from 'vue';
 import { getRandomStr } from '../utils/common.util';
-import { AsyncQueue } from '../utils/AsyncQueue';
+import { AsyncQueue } from '../classes/AsyncQueue';
 import { FileUploader, ICurrentUploadObj } from '../classes/FileUploader';
 
 interface IImgItem {
@@ -56,7 +56,7 @@ const props = defineProps({
 
 const isLoading = ref(false);
 const newImgList = ref<string[]>([]);
-const fileList = ref<any[]>([]);
+const fileList = ref<File[]>([]);
 const progress = computed(() => {
     if (!fileList.value.length) return 0;
     return Math.floor((newImgList.value.length / fileList.value.length) * 100);
@@ -74,18 +74,20 @@ function chooseFile() {
 }
 defineExpose({ chooseFile });
 
-function handleFilesChange(ev) {
+function handleFilesChange(ev: Event) {
     if (isLoading.value) return;
     isLoading.value = true;
-    let files = Array.from(ev.target.files);
-    submitUpload(files);
+    const inputFiles = (ev.target as HTMLInputElement).files;
+    if (!inputFiles) return;
+    const filesArr = Array.from(inputFiles);
+    submitUpload(filesArr);
 }
 
 // 分片上传单个文件
-async function uploadItem(fileItem) {
-    return new Promise((resolve) => {
+async function uploadItem(fileItem: File) {
+    return new Promise(async (resolve) => {
         const fileUploader = new FileUploader(fileItem, props.fileConcurrentChunkNum);
-        fileUploader.enqueue(null, (uploadObj: ICurrentUploadObj) => {
+        await fileUploader.enqueue(null, (uploadObj: ICurrentUploadObj) => {
             let currentItem = { imgUrl: uploadObj.remoteFileUrl };
             resolve(currentItem);
         });
@@ -94,7 +96,7 @@ async function uploadItem(fileItem) {
 }
 
 const emits = defineEmits(['success', 'update:imgList']);
-function submitUpload(fileArr) {
+function submitUpload(fileArr: File[]) {
     fileList.value = fileArr;
     const ChannelQueue = new AsyncQueue(props.fileConcurrentChunkNum);
     ChannelQueue.addManyTask(fileArr, async (queueItem) => {

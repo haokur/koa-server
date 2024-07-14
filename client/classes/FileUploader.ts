@@ -1,10 +1,12 @@
 import axios from 'axios';
-import { AsyncQueue } from '../utils/AsyncQueue';
+import { AsyncQueue } from './AsyncQueue';
+import { getFileExt, getFileMD5 } from '../utils/file.util';
 
 export interface ICurrentUploadObj {
     chunkSize: number;
     file: null | File;
     fileName: string;
+    fileExt: string;
     totalChunk: number;
     finishedChunk: number;
     chunkPercentage: number;
@@ -12,6 +14,17 @@ export interface ICurrentUploadObj {
     chunkStatus: { start: number; end: number; status: 0 | 1 | 2 }[];
     /**上传后远程的文件地址 */
     remoteFileUrl: string;
+    /**md5的值 */
+    md5Value?: string;
+}
+
+export interface IUploaderMethod {
+    /**
+     * 实际上传接口请求方法
+     * @param {number} i 请求片段索引
+     * @returns {Promise<void>}
+     */
+    (i: number): Promise<void>;
 }
 
 export class FileUploader {
@@ -19,6 +32,7 @@ export class FileUploader {
         chunkSize: 1024,
         file: null,
         fileName: '',
+        fileExt: '',
         totalChunk: 0,
         finishedChunk: 0,
         chunkPercentage: 0,
@@ -27,32 +41,39 @@ export class FileUploader {
     };
 
     private splitChunkSize: number;
-    private uploader: any;
+    private uploader: IUploaderMethod;
     private defaultChunkSize = 0.4 * 1024 * 1024;
-    private concurrentMax;
-    private chunkUploadQueue;
+    private concurrentMax: number;
+    private chunkUploadQueue: AsyncQueue;
     constructor(
         file: File,
         concurrentMax = 2,
         chunkSize: number = this.defaultChunkSize,
-        uploader?
+        uploader?: IUploaderMethod | undefined
     ) {
         this.currentUploadObj.file = file;
+        this.currentUploadObj.fileName = file.name;
+        this.currentUploadObj.fileExt = getFileExt(file.name);
         this.currentUploadObj.chunkSize = chunkSize;
+
         this.splitChunkSize = chunkSize;
         this.uploader = uploader || this._defaultUploader;
         this.concurrentMax = concurrentMax;
+        this.chunkUploadQueue = new AsyncQueue(this.concurrentMax);
     }
 
-    private async _defaultUploader(i) {
+    private async _defaultUploader(i: number) {
         const currentUploadObj = this.currentUploadObj;
-        const blob = this.getRangeBufferByIndex(i) as Blob;
-        const { fileName, totalChunk } = currentUploadObj;
+        const blob = this.getRangeBufferByIndex(i);
+        const { fileName, fileExt, totalChunk, md5Value } = currentUploadObj;
 
         const formData = new FormData();
         formData.append('file', blob);
 
-        const reqUrl = `${$env.baseUrl}/file/upload?fileName=${fileName}&currentChunkIndex=${i}&totalChunkNum=${totalChunk}`;
+        let reqUrl = `${$env.baseUrl}/file/upload?fileName=${fileName}&currentChunkIndex=${i}&totalChunkNum=${totalChunk}`;
+        if (md5Value) {
+            reqUrl += `&md5=${md5Value}&ext=${fileExt}`;
+        }
         await axios.post(reqUrl, formData).then(() => {
             currentUploadObj.finishedChunk += 1;
             let progressCount =
@@ -64,7 +85,7 @@ export class FileUploader {
     }
 
     /**根据splitChunkSize切开的，取第i块 */
-    private getRangeBufferByIndex(i) {
+    private getRangeBufferByIndex(i: number) {
         const file = this.currentUploadObj.file as File;
         const start = i * this.splitChunkSize;
         const end = Math.min(start + this.splitChunkSize, file.size);
@@ -97,14 +118,32 @@ export class FileUploader {
         return chunkStatus;
     }
 
+    /**以md5的方式，检查文件是否已经存在，已经存在则不需重复上传 */
+    private async isFileExist(): Promise<boolean> {
+        const md5Value = await getFileMD5(this.currentUploadObj.file as File);
+        this.currentUploadObj.md5Value = md5Value;
+        const result = await axios.head(
+            `${$env.baseUrl}/file/exist?md5=${md5Value}&ext=${this.currentUploadObj.fileExt}`
+        );
+        const size: string = (result.headers['content-length'] || '0') as string;
+        return parseInt(size) > 0;
+    }
+
     /**使用异步队列，切块上传 */
-    enqueue(chunkCallback?, finishCallback?) {
-        this.chunkUploadQueue = new AsyncQueue(this.concurrentMax);
+    async enqueue(chunkCallback?, finishCallback?) {
+        // 获取当前文件的md5值，如果服务器存在该文件，则队列置空，直接返回文件
+        const isFileExist = await this.isFileExist();
+
         this.chunkUploadQueue.finishCallback = () => {
-            const _remoteUrl = `${$env.baseUrl}/file/upload-result?fileName=${this.currentUploadObj.fileName}`;
-            this.currentUploadObj.remoteFileUrl = _remoteUrl;
+            const { md5Value, fileName, fileExt } = this.currentUploadObj;
+            const remoteFileName = md5Value ? `${md5Value}.${fileExt}` : fileName;
+            const remoteFileUrl = `${$env.baseUrl}/file/upload-result?fileName=${remoteFileName}`;
+            this.currentUploadObj.remoteFileUrl = remoteFileUrl;
             finishCallback && finishCallback(this.currentUploadObj);
         };
+
+        if (isFileExist) return;
+
         const chunkStatus = this.splitFile2Chunks();
         this.chunkUploadQueue.addManyTask(chunkStatus, async (taskItem) => {
             const { index } = taskItem;
@@ -117,7 +156,7 @@ export class FileUploader {
         this.chunkUploadQueue.pause();
     }
 
-    start() {
+    async start() {
         this.chunkUploadQueue.run();
     }
 }

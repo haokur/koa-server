@@ -8,11 +8,11 @@ import { FileUploader, ICurrentUploadObj } from '../classes/FileUploader';
 export function useUpload(maxConcurrent = 4, chunkSize = 0.4 * 1024 * 1024) {
     const progress = ref(0);
     const remoteUrl = ref('');
-    let fileUploader: any = null;
+    let fileUploader!: FileUploader;
 
-    const initUpload = (file: File, finishCallback?) => {
+    const initUpload = async (file: File, finishCallback?) => {
         fileUploader = new FileUploader(file, maxConcurrent, chunkSize);
-        fileUploader.enqueue(
+        await fileUploader.enqueue(
             (uploadObj: ICurrentUploadObj) => {
                 progress.value = uploadObj.chunkPercentage;
             },

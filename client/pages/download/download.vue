@@ -7,7 +7,7 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import axios from 'axios';
-import { AsyncQueue } from '../../utils/AsyncQueue';
+import { AsyncQueue } from '../../classes/AsyncQueue';
 
 const ChunkSize = Math.floor(0.4 * 1024 * 1024);
 const fileName = ref('f1708607957313.png');

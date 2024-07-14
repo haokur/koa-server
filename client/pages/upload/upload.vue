@@ -23,9 +23,9 @@ import { ref } from 'vue';
 
 import UploadControl from '../../components/UploadControl.vue';
 import { useUpload } from '../../hooks/upload.hook';
-import { FileUploader } from '../../classes/FileUploader';
 
 const imgList = ref([]);
+const fileMd5Value = ref('');
 
 // 最多并发数量，在上次未完成前，不能再发，避免一次太多请求
 const ConcurrentMaxNum = 2;

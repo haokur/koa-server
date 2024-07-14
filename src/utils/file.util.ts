@@ -3,7 +3,7 @@ import { createHash, Hash } from 'crypto';
 import { asyncForEach } from './common.util';
 
 // 获取文件的md5信息
-export async function getFileMd5Value(filePath) {
+export async function getFileMd5Value(filePath: string): Promise<string> {
     const stream = fs.createReadStream(filePath);
     const hash: Hash = createHash('md5');
     return new Promise((resolve) => {
