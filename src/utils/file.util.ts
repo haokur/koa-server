@@ -102,10 +102,13 @@ export async function combineFileByDebris(debrisPaths: string[], targetPath: str
     });
 }
 
+/**安全可写的目录 */
+const SafePaths = [`${ProcessRunDir}/_temp`];
+
 /**安全拼接路径避免超出可控文件夹范围 */
 export function safePathJoin(...args) {
     const joinResult = path.join(...args);
-    if (!joinResult.startsWith(ProcessRunDir)) {
+    if (!SafePaths.some((item) => joinResult.startsWith(item))) {
         throw `目录超出可操作范围:${joinResult}`;
     }
     return joinResult;
@@ -113,7 +116,7 @@ export function safePathJoin(...args) {
 
 export function safePathResolve(...args) {
     const resolveResult = path.resolve(...args);
-    if (!resolveResult.startsWith(ProcessRunDir)) {
+    if (!SafePaths.some((item) => resolveResult.startsWith(item))) {
         throw `目录超出可操作范围:${resolveResult}`;
     }
     return resolveResult;
