@@ -98,7 +98,6 @@ export class FileUploader {
         const file = this.currentUploadObj.file as File;
         const chunkSize = this.splitChunkSize;
         const totalChunk = Math.ceil(file.size / chunkSize);
-        console.log(file.size, chunkSize, totalChunk, 'FileUploader.ts::101行');
         const chunkStatus = Array.from({ length: totalChunk }, (_, index) => {
             return {
                 index: index,
@@ -134,10 +133,8 @@ export class FileUploader {
     async enqueue(chunkCallback?, finishCallback?) {
         // 获取当前文件的md5值，如果服务器存在该文件，则队列置空，直接返回文件
         const isFileExist = await this.isFileExist();
-        console.log('是否存在', isFileExist, 'FileUploader.ts::136行');
 
         this.chunkUploadQueue.finishCallback = () => {
-            console.log('执行队列完成的回调finishCallback', 'FileUploader.ts::139行');
             const { md5Value, fileName, fileExt } = this.currentUploadObj;
             const remoteFileName = md5Value ? `${md5Value}.${fileExt}` : fileName;
             const remoteFileUrl = `${$env.baseUrl}/file/upload-result?fileName=${remoteFileName}`;
@@ -148,7 +145,6 @@ export class FileUploader {
         if (isFileExist) return;
 
         const chunkStatus = this.splitFile2Chunks();
-        console.log('切割开的块', chunkStatus, 'FileUploader.ts::150行');
         this.chunkUploadQueue.addManyTask(chunkStatus, async (taskItem) => {
             const { index } = taskItem;
             await this.uploader(index);
