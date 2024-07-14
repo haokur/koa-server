@@ -1,15 +1,13 @@
 import fs from 'fs';
-import path from 'path';
-import { combineFileByDebris, makeSureDirExist, writeFileByStream } from '../utils/file.util';
+import { combineFileByDebris, makeSureDirExist, safePathJoin, safePathResolve, writeFileByStream } from '../utils/file.util';
 import { UPLOAD_DIR } from '../configs/const.config';
-import { CommonUtil } from '../utils/common.util';
 
 // 上传标识
 const uploadFlags = {};
 
 export async function FileExist(params) {
     const { md5, ext } = params;
-    let resultFilePath = path.join(UPLOAD_DIR, md5);
+    let resultFilePath = safePathJoin(UPLOAD_DIR, md5);
     resultFilePath += ext ? `.${ext}` : '';
     const isExist = fs.existsSync(resultFilePath);
     return {
@@ -42,13 +40,13 @@ async function FileUpload(params: IFileUploadParams, ctx: IKoaContext) {
     const { fileName, totalChunkNum, currentChunkIndex, md5, ext } = params;
 
     const resultName = md5 || fileName;
-    const fileDir = path.join(UPLOAD_DIR, `temp_${resultName}`);
+    const fileDir = safePathJoin(UPLOAD_DIR, `temp_${resultName}`);
 
     await makeSureDirExist(fileDir);
 
     // await CommonUtil.wait(2000);
 
-    const _localTempFilePath = path.resolve(fileDir, `${currentChunkIndex}.temp`);
+    const _localTempFilePath = safePathResolve(fileDir, `${currentChunkIndex}.temp`);
     await writeFileByStream(tempFilePath, _localTempFilePath);
     if (!uploadFlags[resultName]) {
         uploadFlags[resultName] = new Set();
@@ -57,11 +55,11 @@ async function FileUpload(params: IFileUploadParams, ctx: IKoaContext) {
     const isLastChunk = uploadFlags[resultName].size === +totalChunkNum;
     if (isLastChunk) {
         const filePath = md5
-            ? path.join(UPLOAD_DIR, `${md5}.${ext}`)
-            : path.join(UPLOAD_DIR, fileName);
+            ? safePathJoin(UPLOAD_DIR, `${md5}.${ext}`)
+            : safePathJoin(UPLOAD_DIR, fileName);
         const debrisPaths: string[] = [];
         for (let i = 0; i < totalChunkNum; i++) {
-            debrisPaths.push(path.resolve(fileDir, `${i}.temp`));
+            debrisPaths.push(safePathResolve(fileDir, `${i}.temp`));
         }
         await combineFileByDebris(debrisPaths, filePath);
 
@@ -86,7 +84,7 @@ interface IFileGetUploadResultParams {
 }
 function FileGetUploadResult(params: IFileGetUploadResultParams, ctx: IKoaContext) {
     const { fileName } = params;
-    const filePath = path.join(UPLOAD_DIR, fileName);
+    const filePath = safePathJoin(UPLOAD_DIR, fileName);
     if (fs.existsSync(filePath)) {
         ctx.body = fs.readFileSync(filePath);
     } else {
@@ -97,7 +95,7 @@ function FileGetUploadResult(params: IFileGetUploadResultParams, ctx: IKoaContex
 /**根据头部Range字段，下载片段，若无Range则下载全部 */
 async function FileDownload(params: IKeyValueObject, ctx: IKoaContext) {
     const { fileName } = params;
-    const filePath = path.resolve(UPLOAD_DIR, `${fileName}`);
+    const filePath = safePathResolve(UPLOAD_DIR, `${fileName}`);
 
     if (ctx.request.method === 'HEAD') {
         if (fs.existsSync(filePath)) {

@@ -1,6 +1,10 @@
 import fs from 'fs';
+import path from 'path';
+
 import { createHash, Hash } from 'crypto';
 import { asyncForEach } from './common.util';
+
+const ProcessRunDir = process.cwd();
 
 // 获取文件的md5信息
 export async function getFileMd5Value(filePath: string): Promise<string> {
@@ -96,4 +100,21 @@ export async function combineFileByDebris(debrisPaths: string[], targetPath: str
             writeStream.end();
         });
     });
+}
+
+/**安全拼接路径避免超出可控文件夹范围 */
+export function safePathJoin(...args) {
+    const joinResult = path.join(...args);
+    if (!joinResult.startsWith(ProcessRunDir)) {
+        throw `目录超出可操作范围:${joinResult}`;
+    }
+    return joinResult;
+}
+
+export function safePathResolve(...args) {
+    const resolveResult = path.resolve(...args);
+    if (!resolveResult.startsWith(ProcessRunDir)) {
+        throw `目录超出可操作范围:${resolveResult}`;
+    }
+    return resolveResult;
 }
