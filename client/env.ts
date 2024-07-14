@@ -1,8 +1,8 @@
 export const EnvMap: { [key: string]: IEvnConfig } = {
     development: {
         title: '开发环境',
-        // baseUrl: 'http://localhost:8666',
-        baseUrl: 'http://106.53.114.178:8666',
+        baseUrl: 'http://localhost:8666',
+        // baseUrl: 'http://106.53.114.178:8666',
     },
     test: {
         title: '测试环境',

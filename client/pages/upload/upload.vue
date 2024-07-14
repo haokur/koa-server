@@ -14,7 +14,19 @@
         <img class="img" :src="remoteUrl" v-if="remoteUrl" />
         <div>
             <h3>上传组件</h3>
-            <UploadControl v-model:imgList="imgList"></UploadControl>
+            <div class="mb20">
+                <label class="mr16">同时上传文件数量</label>
+                <el-input-number v-model="concurrentFileNum" :min="1" :max="8" />
+            </div>
+            <div class="mb20">
+                <label class="mr16">单文件切片数量</label>
+                <el-input-number v-model="fileConcurrentChunkNum" :min="1" :max="8" />
+            </div>
+            <UploadControl
+                v-model:imgList="imgList"
+                :concurrentFileNum="concurrentFileNum"
+                :fileConcurrentChunkNum="fileConcurrentChunkNum"
+            ></UploadControl>
         </div>
     </div>
 </template>
@@ -26,6 +38,9 @@ import { useUpload } from '../../hooks/upload.hook';
 
 const imgList = ref([]);
 const fileMd5Value = ref('');
+
+const concurrentFileNum = ref(3);
+const fileConcurrentChunkNum = ref(4);
 
 // 最多并发数量，在上次未完成前，不能再发，避免一次太多请求
 const ConcurrentMaxNum = 2;
