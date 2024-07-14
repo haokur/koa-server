@@ -13,6 +13,6 @@ export const EnvMap: { [key: string]: IEvnConfig } = {
     },
     production: {
         title: '生产环境',
-        baseUrl: 'http://106.53.114.178:8666',
+        baseUrl: 'https://api.haokur.com',
     },
 };
