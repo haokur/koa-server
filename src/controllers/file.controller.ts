@@ -46,7 +46,7 @@ async function FileUpload(params: IFileUploadParams, ctx: IKoaContext) {
 
     await makeSureDirExist(fileDir);
 
-    await CommonUtil.wait(2000);
+    // await CommonUtil.wait(2000);
 
     const _localTempFilePath = path.resolve(fileDir, `${currentChunkIndex}.temp`);
     await writeFileByStream(tempFilePath, _localTempFilePath);
@@ -123,7 +123,7 @@ async function FileDownload(params: IKeyValueObject, ctx: IKoaContext) {
         const file = fs.createReadStream(filePath, { start, end });
         ctx.status = 206;
 
-        await CommonUtil.wait(2000);
+        // await CommonUtil.wait(2000);
 
         return {
             headers: { 'Content-Type': 'application/octet-stream' },
