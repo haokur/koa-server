@@ -32,12 +32,18 @@ export class MultiChannel {
     tasks: ITask[] = [];
     channelMaxNum = 0;
     channelInit: any;
-    public finishCallback: any;
+    private finishCallback: any;
     private isPause = false; // 暂停状态
 
     constructor(channelMaxNum, channelInit) {
         this.channelMaxNum = channelMaxNum;
         this.channelInit = channelInit;
+    }
+
+    // 设置整个完成的回调
+    onFinished(callback) {
+        this.finishCallback = callback;
+        return this;
     }
 
     // 添加多个任务，在各个channel中，自动填充
@@ -50,6 +56,7 @@ export class MultiChannel {
                 index: index,
             };
         });
+        return this;
     }
 
     // 检查通道，是否可以再创建
@@ -68,7 +75,6 @@ export class MultiChannel {
                 });
             }
         }
-        console.log(`共创建${this.channels.length}个通道`, 'MultiChannel.ts::41行');
     }
 
     private runTask() {
@@ -91,6 +97,7 @@ export class MultiChannel {
                 const currentTask = this.tasks.shift() as ITask;
                 const { task, callback, index } = currentTask;
                 currentTask.status = TaskStatus.Running;
+                // console.log(`通道${channel.index}处理${index}的数据`, 'MultiChannel.ts::100行');
 
                 callback(channel, task, index).then(() => {
                     channel.status = ChannelStatus.Free;
@@ -106,6 +113,7 @@ export class MultiChannel {
     run() {
         this.isPause = false;
         this.runTask();
+        return this;
     }
 
     // 暂停执行
