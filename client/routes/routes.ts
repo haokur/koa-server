@@ -18,5 +18,10 @@ export const router = createRouter({
             name: 'download',
             component: () => import('../pages/download/download.vue'),
         },
+        {
+            path: '/slice-worker',
+            name: 'slice-worker',
+            component: () => import('../pages/slice-worker/slice-worker.vue'),
+        },
     ],
 });

@@ -23,3 +23,14 @@ export function getFileMD5(file: File): Promise<string> {
 export function getFileExt(filePath: string): string {
     return filePath.split('.').pop() || '';
 }
+
+export function downloadFileByBlob(fileBufferData: Blob[], fileName: string) {
+    const blob = new Blob(fileBufferData);
+    const downloadUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(downloadUrl);
+}
