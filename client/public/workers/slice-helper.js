@@ -5,8 +5,7 @@ const WorkerHandler = {
     },
     sliceFileMany(payload) {
         const { file, chunks } = payload;
-        // console.log(file, chunks, 'slice-helper.ts::8行');
-        const chunkData: any[] = [];
+        const chunkData = [];
         chunks.forEach((item) => {
             const { start, end } = item;
             chunkData.push(file.slice(start, end));
@@ -25,7 +24,7 @@ const WorkerHandler = {
 self.onmessage = async function (event) {
     const { _id, payload } = event.data;
     const { action } = payload;
-    let result: any = null;
+    let result = null;
     if (WorkerHandler[action]) {
         result = await WorkerHandler[action](payload);
     }

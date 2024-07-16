@@ -13,7 +13,7 @@ export default defineConfig({
     base: './',
     build: {
         outDir: './dist',
-        assetsDir: 'static',
+        copyPublicDir: true,
         // sourcemap: true,
     },
     plugins: [vue(), vueJsx()],

@@ -1,7 +1,9 @@
 <template>
     <div class="mb20 intro">
         实测发现：
-        <p>1、在小文件，少文件，使用同步处理的时间会更优于使用webworker处理，因为开启webworker会有损耗，通信也会有消耗</p>
+        <p>
+            1、在小文件，少文件，使用同步处理的时间会更优于使用webworker处理，因为开启webworker会有损耗，通信也会有消耗
+        </p>
         <p>2、使用webworker不会阻塞渲染进程，在进行slice时，不会阻碍刷新渲染</p>
         <p>3、当处理的量级上去之后，比如8个大文件要进行切割，使用webworker的优势才开始显现</p>
         <p>4、打开控制台，可以看到console.time打印的耗时</p>
@@ -71,7 +73,7 @@ const handleFileChange2 = async (ev) => {
      */
     console.time('webworker，任务不分组切割');
     const channel = new MultiChannel(workerNum, () => {
-        return new WorkerHelper('/static/slice-helper.ts');
+        return new WorkerHelper(`${$env.workerBaseUrl}/slice-helper.js`);
     })
         .onFinished(() => {
             console.timeEnd('webworker，任务不分组切割');
@@ -112,7 +114,7 @@ const handleFileChange3 = async (ev) => {
     console.time('webworker任务分组切割');
     const workerChunkArr: any[] = [];
     const channel = new MultiChannel(workerNum, () => {
-        return new WorkerHelper('/static/slice-helper.ts');
+        return new WorkerHelper(`${$env.workerBaseUrl}/slice-helper.js`);
     })
         .onFinished(() => {
             console.timeEnd('webworker任务分组切割');
@@ -152,7 +154,7 @@ const handleFileChange5 = async (ev) => {
     const filesArr = Array.from(files);
     console.time('webworker，按文件分别分组切割');
     const channel = new MultiChannel(8, () => {
-        return new WorkerHelper('/static/slice-helper.ts');
+        return new WorkerHelper(`${$env.workerBaseUrl}/slice-helper.js`);
     })
         .onFinished(() => {
             console.timeEnd('webworker，按文件分别分组切割');
@@ -170,7 +172,7 @@ const handleFileChange5 = async (ev) => {
 };
 </script>
 <style lang="scss" scoped>
-.intro{
+.intro {
     padding: 10px;
     border: 1px dashed #e1e1e1;
 }
