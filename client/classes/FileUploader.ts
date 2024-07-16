@@ -1,5 +1,4 @@
 import axios from 'axios';
-// import { AsyncQueue } from './AsyncQueue';
 import { getFileExt, getFileMD5 } from '../utils/file.util';
 import { MultiChannel } from './MultiChannel';
 

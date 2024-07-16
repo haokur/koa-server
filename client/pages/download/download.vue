@@ -8,7 +8,6 @@
 import { reactive, ref } from 'vue';
 import axios from 'axios';
 import { MultiChannel } from '../../classes/MultiChannel';
-// import { AsyncQueue } from '../../classes/AsyncQueue';
 
 const ChunkSize = Math.floor(0.4 * 1024 * 1024);
 const fileName = ref('cb266c4e2f66de54c5fd04073a713579.png');
@@ -102,9 +101,6 @@ async function setDownloadInfo(url) {
 
 const maxConcurrent = 2;
 const downloadChannel = new MultiChannel(maxConcurrent);
-
-// const conQueue = new AsyncQueue(maxConcurrent, true);
-// conQueue.finishCallback = allDownloadCallback;
 
 async function downloadFile(url) {
     if (url !== currentDownloadObj.fileUrl) {

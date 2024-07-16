@@ -13,7 +13,6 @@
     </div>
 </template>
 <script lang="ts" setup>
-// import { AsyncQueue } from '../../classes/AsyncQueue';
 // import { MultiChannel } from '../../classes/MultiChannel';
 import { HomeLinkList } from '../../configs/data.config';
 
@@ -24,7 +23,7 @@ import { HomeLinkList } from '../../configs/data.config';
 //         }, duration);
 //     });
 // };
-// const queue = new MultiChannel(4, () => {});
+// const queue = new MultiChannel(1, () => {});
 // queue.addManyTask(
 //     [
 //         { start: 1, end: 10, index: 0 },

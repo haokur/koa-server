@@ -34,7 +34,6 @@
 <script lang="tsx" setup>
 import { PropType, computed, onMounted, ref } from 'vue';
 import { getRandomStr } from '../utils/common.util';
-// import { AsyncQueue } from '../classes/AsyncQueue';
 import { FileUploader, ICurrentUploadObj } from '../classes/FileUploader';
 import { MultiChannel } from '../classes/MultiChannel';
 
