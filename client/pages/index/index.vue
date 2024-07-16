@@ -13,10 +13,39 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { onMounted } from 'vue';
+// import { AsyncQueue } from '../../classes/AsyncQueue';
+// import { MultiChannel } from '../../classes/MultiChannel';
 import { HomeLinkList } from '../../configs/data.config';
 
-onMounted(() => {});
+// const wait = async (duration) => {
+//     return new Promise<void>((resolve, reject) => {
+//         setTimeout(() => {
+//             resolve();
+//         }, duration);
+//     });
+// };
+// const queue = new MultiChannel(4, () => {});
+// queue.addManyTask(
+//     [
+//         { start: 1, end: 10, index: 0 },
+//         { start: 11, end: 20, index: 1 },
+//         { start: 11, end: 20, index: 2 },
+//         { start: 11, end: 20, index: 3 },
+//         { start: 11, end: 20, index: 4 },
+//         { start: 11, end: 20, index: 5 },
+//     ],
+//     async (data, channel) => {
+//         console.log(data, 'index.vue::30行');
+//         await wait(3000);
+//     }
+// );
+// queue.run();
+// queue
+//     .pause()
+//     .addTask({ start: 99, end: 111, index: 6 }, async (...args) => {
+//         console.log(args, 'index.vue::45行');
+//     })
+//     .run();
 </script>
 <style lang="scss" scoped>
 .link {

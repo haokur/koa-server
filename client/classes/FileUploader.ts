@@ -1,6 +1,7 @@
 import axios from 'axios';
-import { AsyncQueue } from './AsyncQueue';
+// import { AsyncQueue } from './AsyncQueue';
 import { getFileExt, getFileMD5 } from '../utils/file.util';
+import { MultiChannel } from './MultiChannel';
 
 export interface ICurrentUploadObj {
     chunkSize: number;
@@ -45,7 +46,7 @@ export class FileUploader {
     private splitChunkSize: number;
     private uploader: IUploaderMethod;
     private concurrentMax: number;
-    private chunkUploadQueue: AsyncQueue;
+    private chunkUploadQueue: MultiChannel;
     constructor(
         file: File,
         concurrentMax?,
@@ -59,7 +60,7 @@ export class FileUploader {
         this.currentUploadObj.chunkSize = this.splitChunkSize;
         this.uploader = uploader || this._defaultUploader;
         this.concurrentMax = concurrentMax || DefaultMaxConcurrent;
-        this.chunkUploadQueue = new AsyncQueue(this.concurrentMax);
+        this.chunkUploadQueue = new MultiChannel(this.concurrentMax);
     }
 
     private async _defaultUploader(i: number) {
@@ -134,13 +135,20 @@ export class FileUploader {
         // 获取当前文件的md5值，如果服务器存在该文件，则队列置空，直接返回文件
         const isFileExist = await this.isFileExist();
 
-        this.chunkUploadQueue.finishCallback = () => {
+        // this.chunkUploadQueue.finishCallback = () => {
+        //     const { md5Value, fileName, fileExt } = this.currentUploadObj;
+        //     const remoteFileName = md5Value ? `${md5Value}.${fileExt}` : fileName;
+        //     const remoteFileUrl = `${$env.baseUrl}/file/upload-result?fileName=${remoteFileName}`;
+        //     this.currentUploadObj.remoteFileUrl = remoteFileUrl;
+        //     finishCallback && finishCallback(this.currentUploadObj);
+        // };
+        this.chunkUploadQueue.onFinished(() => {
             const { md5Value, fileName, fileExt } = this.currentUploadObj;
             const remoteFileName = md5Value ? `${md5Value}.${fileExt}` : fileName;
             const remoteFileUrl = `${$env.baseUrl}/file/upload-result?fileName=${remoteFileName}`;
             this.currentUploadObj.remoteFileUrl = remoteFileUrl;
             finishCallback && finishCallback(this.currentUploadObj);
-        };
+        });
 
         if (isFileExist) return;
 

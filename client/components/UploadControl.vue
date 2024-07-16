@@ -34,8 +34,9 @@
 <script lang="tsx" setup>
 import { PropType, computed, onMounted, ref } from 'vue';
 import { getRandomStr } from '../utils/common.util';
-import { AsyncQueue } from '../classes/AsyncQueue';
+// import { AsyncQueue } from '../classes/AsyncQueue';
 import { FileUploader, ICurrentUploadObj } from '../classes/FileUploader';
+import { MultiChannel } from '../classes/MultiChannel';
 
 interface IImgItem {
     imgUrl: string;
@@ -98,20 +99,21 @@ async function uploadItem(fileItem: File) {
 const emits = defineEmits(['success', 'update:imgList']);
 function submitUpload(fileArr: File[]) {
     fileList.value = fileArr;
-    const ChannelQueue = new AsyncQueue(props.fileConcurrentChunkNum);
+    const ChannelQueue = new MultiChannel(props.fileConcurrentChunkNum);
     ChannelQueue.addManyTask(fileArr, async (queueItem) => {
         const uploadResult = await uploadItem(queueItem);
         emits('update:imgList', [...props.imgList, uploadResult]);
         emits('success', uploadResult);
         newImgList.value.push('');
     });
-    ChannelQueue.finishCallback = () => {
+    ChannelQueue.onFinished(() => {
         setTimeout(() => {
             isLoading.value = false;
             newImgList.value = [];
             fileList.value = [];
         }, 2000);
-    };
+    });
+    // ChannelQueue.finishCallback = ;
     ChannelQueue.run();
 }
 </script>

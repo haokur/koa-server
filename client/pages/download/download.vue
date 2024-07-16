@@ -7,10 +7,11 @@
 <script lang="ts" setup>
 import { reactive, ref } from 'vue';
 import axios from 'axios';
-import { AsyncQueue } from '../../classes/AsyncQueue';
+import { MultiChannel } from '../../classes/MultiChannel';
+// import { AsyncQueue } from '../../classes/AsyncQueue';
 
 const ChunkSize = Math.floor(0.4 * 1024 * 1024);
-const fileName = ref('f1708607957313.png');
+const fileName = ref('cb266c4e2f66de54c5fd04073a713579.png');
 const currentDownloadObj = reactive<{
     fileName: string;
     fileUrl: string;
@@ -74,9 +75,6 @@ async function allDownloadCallback() {
 }
 
 // 开始按段请求下载
-const maxConcurrent = 2;
-const conQueue = new AsyncQueue(maxConcurrent, true);
-conQueue.finishCallback = allDownloadCallback;
 
 async function setDownloadInfo(url) {
     // 先试用HEAD方式仅获取文件大小
@@ -102,9 +100,15 @@ async function setDownloadInfo(url) {
     }
 }
 
+const maxConcurrent = 2;
+const downloadChannel = new MultiChannel(maxConcurrent);
+
+// const conQueue = new AsyncQueue(maxConcurrent, true);
+// conQueue.finishCallback = allDownloadCallback;
+
 async function downloadFile(url) {
     if (url !== currentDownloadObj.fileUrl) {
-        conQueue.clear();
+        downloadChannel.clear();
         currentDownloadObj.fileUrl = url;
         await setDownloadInfo(url);
     }
@@ -114,8 +118,14 @@ async function downloadFile(url) {
         const chunk = await fetchChunk(url, start, end);
         currentDownloadObj.chunkRangeData[index] = chunk;
     };
-    conQueue.addManyTask(currentDownloadObj.chunkRanges, queueCallback);
-    conQueue.run();
+
+    downloadChannel
+        .onFinished(allDownloadCallback)
+        .addManyTask(currentDownloadObj.chunkRanges, queueCallback)
+        .run();
+
+    // conQueue.addManyTask(currentDownloadObj.chunkRanges, queueCallback);
+    // conQueue.run();
 }
 
 // 按分段数据拼接

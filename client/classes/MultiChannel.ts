@@ -23,7 +23,10 @@ interface ITask {
     task: any;
     callback: (...args: any[]) => Promise<any>;
     status: TaskStatus;
-    index: number;
+}
+
+interface ITaskCallback<T> {
+    (task: T, channel: IChannelItem): Promise<void>;
 }
 
 /**多管道并发 */
@@ -35,7 +38,7 @@ export class MultiChannel {
     private finishCallback: any;
     private isPause = false; // 暂停状态
 
-    constructor(channelMaxNum, channelInit) {
+    constructor(channelMaxNum, channelInit?) {
         this.channelMaxNum = channelMaxNum;
         this.channelInit = channelInit;
     }
@@ -46,14 +49,22 @@ export class MultiChannel {
         return this;
     }
 
+    addTask<T>(task: T, callback: ITaskCallback<T>) {
+        this.tasks.push({
+            task,
+            callback,
+            status: TaskStatus.Wait,
+        });
+        return this;
+    }
+
     // 添加多个任务，在各个channel中，自动填充
-    addManyTasks(tasks, callback) {
-        this.tasks = tasks.map((task, index) => {
+    addManyTask<T>(tasks: T[], callback: ITaskCallback<T>) {
+        this.tasks = tasks.map((task) => {
             return {
                 task,
                 callback,
                 status: TaskStatus.Wait,
-                index: index,
             };
         });
         return this;
@@ -71,7 +82,7 @@ export class MultiChannel {
                 this.channels.push({
                     index: i,
                     status: ChannelStatus.Free,
-                    channelInstance: this.channelInit(),
+                    channelInstance: this.channelInit ? this.channelInit() : null,
                 });
             }
         }
@@ -95,11 +106,11 @@ export class MultiChannel {
                 channel.status = ChannelStatus.Running;
 
                 const currentTask = this.tasks.shift() as ITask;
-                const { task, callback, index } = currentTask;
+                const { callback, task } = currentTask;
                 currentTask.status = TaskStatus.Running;
-                // console.log(`通道${channel.index}处理${index}的数据`, 'MultiChannel.ts::100行');
+                // console.log(`通道${channel.index}处理${currentTask.index}的数据`, 'MultiChannel.ts::100行');
 
-                callback(channel, task, index).then(() => {
+                callback(task, channel).then(() => {
                     channel.status = ChannelStatus.Free;
                     currentTask.status = TaskStatus.Finished;
 
@@ -119,6 +130,7 @@ export class MultiChannel {
     // 暂停执行
     pause() {
         this.isPause = true;
+        return this;
     }
 
     // 清除
@@ -126,5 +138,6 @@ export class MultiChannel {
         this.isPause = true;
         this.tasks = [];
         this.channels = [];
+        return this;
     }
 }

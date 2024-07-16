@@ -80,7 +80,7 @@ const handleFileChange2 = async (ev) => {
             downloadFileByBlob(chunkDataArr, file.name);
             channel.clear();
         })
-        .addManyTasks(allTasks, async (workerHelper, taskData, index) => {
+        .addManyTask(allTasks, async (taskData, workerHelper) => {
             const instance = workerHelper.channelInstance;
             const { start, end } = taskData;
             let result = await instance.postMessage({
@@ -124,9 +124,9 @@ const handleFileChange3 = async (ev) => {
             downloadFileByBlob(fileBufferArr, file.name);
             channel.clear();
         })
-        .addManyTasks(chunksTasks, async (workerHelper, taskData, index) => {
-            const instance = workerHelper.channelInstance;
-            let result = await instance.postMessage({
+        .addManyTask(chunksTasks, async (taskData, workerHelper) => {
+            const { channelInstance, index } = workerHelper;
+            let result = await channelInstance.postMessage({
                 action: 'sliceFileMany',
                 file: file,
                 chunks: taskData,
@@ -159,7 +159,7 @@ const handleFileChange5 = async (ev) => {
         .onFinished(() => {
             console.timeEnd('webworker，按文件分别分组切割');
         })
-        .addManyTasks(filesArr, async (workerHelper, file, index) => {
+        .addManyTask(filesArr, async (file, workerHelper) => {
             const instance = workerHelper.channelInstance;
             const { allTasks } = getCommonInfo(file);
             let result = await instance.postMessage({
