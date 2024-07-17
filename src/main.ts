@@ -2,9 +2,10 @@ import Koa from 'koa';
 import KoaBody from 'koa-body';
 import { useRoutes } from './routes/use-router';
 import { CorsMiddle } from './middlewares/cors.middleware';
+import { KoaConfig } from './services/config.service';
 
 const app = new Koa();
-const port = 8666;
+const port = KoaConfig.KOA_PORT;
 
 const KoaBodyMiddleware = KoaBody({
     multipart: true,

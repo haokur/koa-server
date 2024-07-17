@@ -5,7 +5,7 @@
   "main": "src/main.ts",
   "scripts": {
     "start": "concurrently \"npm run serve\" \"npm run client\"",
-    "serve": "ts-node scripts/dev-server.ts",
+    "serve": "cross-env NODE_ENV=development ts-node scripts/dev-server.ts",
     "client": "vite --config ./client/vite.config.ts",
     "prepare": "husky",
     "spell-check": "cspell .",
@@ -13,7 +13,7 @@
     "lint:fix": "eslint . --fix",
     "build": "vite build --config ./client/vite.config.ts",
     "build:serve": "tsc",
-    "preview:serve": "node ./dist/main.js",
+    "preview:serve": "cross-env NODE_ENV=production node ./dist/main.js",
     "pm2:serve": "pm2 start npm --name koa-server-8666 -- run preview:serve"
   },
   "keywords": [
@@ -56,12 +56,15 @@
   },
   "dependencies": {
     "@types/axios": "^0.14.0",
+    "@types/mysql": "^2.15.26",
     "@types/spark-md5": "^3.0.4",
     "@types/vue-router": "^2.0.0",
     "axios": "^1.7.2",
+    "cross-env": "^7.0.3",
     "element-plus": "^2.7.6",
     "koa": "^2.15.3",
     "koa-body": "^6.0.1",
+    "mysql": "^2.18.1",
     "spark-md5": "^3.0.2",
     "vue": "^3.4.31",
     "vue-router": "^4.4.0"

@@ -7,9 +7,13 @@
         "client/dist/**"
     ],
     "words": [
+        "datetime",
         "EDITMSG",
         "haokur",
-        "webworker"
+        "tinyint",
+        "varchar",
+        "webworker",
+        "xiaobing"
     ],
     "flagWords": []
 }
