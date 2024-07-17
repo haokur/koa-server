@@ -3,7 +3,7 @@ import { KoaConfig } from './config.service';
 import { ITableModel } from '../typings/model';
 import { CommonUtil } from '../utils/common.util';
 
-type AtLeastOne<T> = { [K in keyof T]: Pick<T, K> }[keyof T];
+export type AtLeastOne<T> = { [K in keyof T]: Pick<T, K> }[keyof T];
 
 let connection: Connection;
 let connectionWorking = false;

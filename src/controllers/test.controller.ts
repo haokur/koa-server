@@ -1,4 +1,5 @@
 // import { RedisService } from '../services/redis.service';
+import { QueryService } from '../services/query.service';
 import { SqlService } from '../services/sql.service';
 
 /**测试添加表 */
@@ -126,7 +127,26 @@ async function RedisQuery() {
     return 'xxx';
 }
 
+async function TestQuery() {
+    // const result = await QueryService.find('user');
+    // const result1 = await QueryService.find('user', { username: 'abc' });
+    // const result = await QueryService.first('user', { username: 'abc' });
+    // const result = await QueryService.insert('user', {
+    //     username: '用户名2',
+    //     email: '邮箱2',
+    // });
+
+    const result = await QueryService.findByPage(
+        'user',
+        { username: 'xiaobing' },
+        { pageIndex: 1, pageSize: 10 }
+    );
+
+    return result;
+}
+
 export const TestRoutes = {
+    '/test/mysql-redis-query': TestQuery,
     // '/test/table-create': TestCreateTable,
     // '/test/table-insert': TestTableInsert,
     // '/test/table-insert-many': TestTableInsertMany,

@@ -28,6 +28,7 @@ export const RedisService = {
     async get(key: string) {
         await this.connect();
         let cacheValue = await RedisClient.get(key);
+        if (!cacheValue) return;
         const isObjectStr = cacheValue.startsWith('{') || cacheValue.startsWith('[');
         if (cacheValue && isObjectStr) {
             try {

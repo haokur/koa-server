@@ -7,6 +7,8 @@
 - [x] client端使用vue3+vite+ts
 - [x] 文件分片上传下载
 - [x] ~~SQLite~~Mysql
+- [x] Redis
+- [x] mysql，redis联动API，数据一致性
 - [ ] 音视频
 
 
@@ -63,6 +65,8 @@ await SqlService.findByPage('user',,{ username: 'jack' },{
 await SqlService.count('user', { username: 'jack' });
 
 ```
+
+QueryService中实现的功能，使用QueryService自动处理redis缓存。
 
 ##### 环境变量配置
 

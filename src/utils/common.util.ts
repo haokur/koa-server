@@ -20,6 +20,11 @@ export const CommonUtil = {
     getRunDir() {
         return process.cwd();
     },
+    nextTick(callback) {
+        new Promise<void>((resolve) => resolve()).then(() => {
+            callback();
+        });
+    },
     /**等待 */
     async wait(duration) {
         await new Promise((resolve) => {
