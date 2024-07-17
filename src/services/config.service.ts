@@ -7,6 +7,7 @@ interface IKoaConfig {
     ENV: 'development' | 'test' | 'uat' | 'production';
     /**KOA应用端口号 */
     KOA_PORT: string;
+    
     /**mysql域名 */
     MYSQL_HOST: string;
     /**mysql端口 */
@@ -17,6 +18,9 @@ interface IKoaConfig {
     MYSQL_PASSWORD: string;
     /**mysql数据库名 */
     MYSQL_DATABASE: string;
+
+    /**redis链接 */
+    REDIS_LINK: string;
 }
 
 let initialized = false;

@@ -1,3 +1,4 @@
+// import { RedisService } from '../services/redis.service';
 import { SqlService } from '../services/sql.service';
 
 /**测试添加表 */
@@ -80,11 +81,57 @@ async function TestTableQuery() {
     return result;
 }
 
+async function RedisQuery() {
+    // await RedisService.set('hello', 'good');
+    // await RedisService.set('array', [1, 2, 3, 4, 5]);
+    // await RedisService.set('number', 1);
+    // await RedisService.set('json', { name: 'jack' });
+    // await RedisService.set('string', 'abcd');
+
+    // const arrayData = await RedisService.get('array');
+    // const numberData = await RedisService.get('number');
+    // const jsonData = await RedisService.get('json');
+    // const stringData = await RedisService.get('string');
+    // console.log(
+    //     typeof arrayData,
+    //     typeof numberData,
+    //     typeof jsonData,
+    //     typeof stringData,
+    //     arrayData,
+    //     numberData,
+    //     jsonData,
+    //     stringData,
+    //     'test.controller.ts::95行'
+    // );
+
+    // const allKeys = await RedisService.getAllKeys();
+    // console.log(allKeys, 'test.controller.ts::108行');
+
+    // const allValues = await RedisService.getAll();
+    // console.log(allValues, allValues.array, typeof allValues.array, 'test.controller.ts::111行');
+
+    // await RedisService.set('string', 'good');
+
+    // if (numberData > 0) {
+    //     console.log(1, 'test.controller.ts::116行');
+    // }
+
+    // return arrayData;
+
+    // await RedisService.set('mp_link_list', [{ name: 'xxx' }]);
+    // await RedisService.set('mp_link_item_1', { name: 'xxx' });
+
+    // await RedisService.delete('mp_link*');
+    // await RedisService.clearAll();
+    return 'xxx';
+}
+
 export const TestRoutes = {
-    '/test/table-create': TestCreateTable,
-    '/test/table-insert': TestTableInsert,
-    '/test/table-insert-many': TestTableInsertMany,
-    '/test/table-delete': TestTableDelete,
-    '/test/table-update': TestTableUpdate,
-    '/test/table-query': TestTableQuery,
+    // '/test/table-create': TestCreateTable,
+    // '/test/table-insert': TestTableInsert,
+    // '/test/table-insert-many': TestTableInsertMany,
+    // '/test/table-delete': TestTableDelete,
+    // '/test/table-update': TestTableUpdate,
+    // '/test/table-query': TestTableQuery,
+    // '/test/redis-query': RedisQuery,
 };
