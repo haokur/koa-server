@@ -73,8 +73,16 @@ async function GithubViewerCount(params, ctx) {
                 累计访问数 ${totalViewCount}
             </text>
         </svg>`;
-    ctx.type = 'image/svg+xml';
-    ctx.body = svgContent;
+
+    // ctx.type = 'image/svg+xml';
+    // ctx.body = svgContent;
+    return {
+        headers: {
+            'content-type': 'image/svg+xml',
+            'cache-control': 'no-cache',
+        },
+        body: svgContent,
+    };
 }
 
 export const GithubRoutes = {
