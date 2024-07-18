@@ -1,5 +1,6 @@
 // import { RedisService } from '../services/redis.service';
 import { QueryService } from '../services/query.service';
+import { RedisService } from '../services/redis.service';
 import { SqlService } from '../services/sql.service';
 
 /**测试添加表 */
@@ -136,11 +137,23 @@ async function TestQuery() {
     //     email: '邮箱2',
     // });
 
-    const result = await QueryService.findByPage(
-        'user',
-        { username: 'xiaobing' },
-        { pageIndex: 1, pageSize: 10 }
+    // const result = await QueryService.findByPage(
+    //     'user',
+    //     { username: 'xiaobing' },
+    //     { pageIndex: 1, pageSize: 10 }
+    // );
+
+    await RedisService.setMany(
+        [
+            { key: 'key1', value: 'value1', expireSecond: 30 },
+            { key: 'key2', value: 'value2' },
+            { key: 'key3', value: 'value3' },
+        ],
+        50
     );
+
+    const result = await RedisService.get('key1');
+    console.log(result, 'test.controller.ts::155行');
 
     return result;
 }

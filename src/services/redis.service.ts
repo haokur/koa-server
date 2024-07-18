@@ -3,6 +3,15 @@ import { KoaConfig } from './config.service';
 import { asyncForEach } from '../utils/common.util';
 let RedisClient;
 
+interface ISetItem {
+    /**redis的key */
+    key: string;
+    /**redis的值 */
+    value: number | string | object;
+    /**单项过期时间 */
+    expireSecond?: number;
+}
+
 export const RedisService = {
     async connect(redisLink = KoaConfig.REDIS_LINK) {
         if (RedisClient) return RedisClient;
@@ -53,6 +62,22 @@ export const RedisService = {
         await RedisClient.set(key, value, options, function (err) {
             if (err) throw err;
         });
+    },
+    async setMany(data: ISetItem[], commonExpireSecond?: number) {
+        await this.connect();
+        const multi = RedisClient.multi();
+        const options = { NX: false };
+        if (commonExpireSecond) {
+            Object.assign(options, { EX: commonExpireSecond });
+        }
+        data.forEach((item) => {
+            const itemOptions = { ...options };
+            if (item.expireSecond) {
+                Object.assign(itemOptions, { EX: item.expireSecond });
+            }
+            multi.set(item.key, item.value, itemOptions);
+        });
+        multi.exec();
     },
     async delete(key) {
         if (key === '*') throw '删除所有请使用clearAll方法';
