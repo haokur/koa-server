@@ -5,6 +5,12 @@ import { CommonUtil } from '../utils/common.util';
 
 export type AtLeastOne<T> = { [K in keyof T]: Pick<T, K> }[keyof T];
 
+interface ICreateTableConfig<T extends keyof ITableModel> {
+    tableName: T;
+    tableComment: string;
+    tableColumns: Partial<ITableModel[T]>;
+}
+
 let connection: Connection;
 let connectionWorking = false;
 let pingInterval;
@@ -92,7 +98,10 @@ export const SqlService = {
             });
         });
     },
-    createTable(config: IKeyValueObject, withDefaultColumns = true): Promise<OkPacket> {
+    createTable<T extends keyof ITableModel>(
+        config: ICreateTableConfig<T>,
+        withDefaultColumns = true
+    ): Promise<OkPacket> {
         // "type(<长度>)|isNotNull|isIndexProp|autoIncrement|comment|defaultValue"
         const { tableName, tableComment, tableColumns } = config;
         const primaryKeys: string[] = [];

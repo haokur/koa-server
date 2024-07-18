@@ -18,7 +18,21 @@ interface IUser extends ITableCommonColumns {
     email: string;
 }
 
+/**github访问表 */
+interface IGithubViewer extends ITableCommonColumns {
+    /**对应github的用户 */
+    username: string;
+    /**访问来源，比如主页，项目或者其他第三方链接 */
+    spm_id_from: string;
+    /**访问者的真实IP */
+    ip: string;
+    /**访问的日期（没有时分秒，用来统计当日访问量） */
+    view_date: string;
+}
+
 export interface ITableModel {
     /**用户表 */
     user: IUser;
+    /**github访问表 */
+    github_viewer: IGithubViewer;
 }

@@ -9,6 +9,7 @@
 - [x] ~~SQLite~~Mysql
 - [x] Redis
 - [x] mysql，redis联动API，数据一致性
+- [x] github访问统计svg
 - [ ] 音视频
 
 
