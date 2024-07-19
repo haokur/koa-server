@@ -1,9 +1,9 @@
 import routes from './routes';
+import wsRoute from './ws.routes';
 
 export const useRoutes = async (ctx: any) => {
     const { request: req } = ctx;
     const [url, query = ''] = req.url.split('?');
-
     // 解析参数
     const queryObj: IKeyValueObject = {};
     // 1.拼接get请求参数
@@ -53,5 +53,17 @@ export const useRoutes = async (ctx: any) => {
         }
     } else {
         ctx.body = '404 not found!!!';
+    }
+};
+
+export const useWsRoutes = async (ctx, next) => {
+    const path = ctx.path;
+    console.log(path, 'use-router.ts::61行');
+    const handler = wsRoute[path];
+    const params = {};
+    if (handler) {
+        await handler(params, ctx);
+    } else {
+        next();
     }
 };
