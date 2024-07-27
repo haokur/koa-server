@@ -23,5 +23,10 @@ export const router = createRouter({
             name: 'slice-worker',
             component: () => import('../pages/slice-worker/slice-worker.vue'),
         },
+        {
+            path: '/error-report',
+            name: 'error-report',
+            component: () => import('../pages/error-report/error-report.vue'),
+        },
     ],
 });

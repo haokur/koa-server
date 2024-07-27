@@ -1,8 +1,8 @@
 import { OkPacket } from 'mysql';
-import { ITableModel } from '../typings/model';
 import { RedisService } from './redis.service';
 import { AtLeastOne, SqlService } from './sql.service';
 import { CommonUtil } from '../utils/common.util';
+import { ITableModel } from '../databases/tables.db';
 
 const MysqlRedisPrefix = 'mysql_';
 /**

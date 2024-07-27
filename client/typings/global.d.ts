@@ -1,4 +1,6 @@
 interface IEvnConfig {
+    /**环境 */
+    NODE_ENV: 'development' | 'test' | 'uat' | 'production';
     /**应用标题 */
     title: string;
     /**请求基础地址 */
