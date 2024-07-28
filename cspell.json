@@ -4,7 +4,9 @@
     "ignorePaths": [
         "node_modules/**",
         "dist/**",
-        "client/dist/**"
+        "client/dist/**",
+        "_sourcemaps/**",
+        "_temp/**"
     ],
     "words": [
         "camo",
