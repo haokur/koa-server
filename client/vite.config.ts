@@ -6,6 +6,8 @@ import vueJsx from '@vitejs/plugin-vue-jsx';
 import { defineConfig } from 'vite';
 import { EnvMap } from './env';
 
+import copyPlugin from './vite-plugins/copy-files';
+
 const Env = process.env.NODE_ENV || 'production';
 
 export default defineConfig({
@@ -14,9 +16,17 @@ export default defineConfig({
     build: {
         outDir: './dist',
         copyPublicDir: true,
-        // sourcemap: true,
+        sourcemap: true,
     },
-    plugins: [vue(), vueJsx()],
+    plugins: [
+        vue(),
+        vueJsx(),
+        copyPlugin({
+            from: 'client/dist/assets',
+            to: '_sourcemaps/assets',
+            ext: ['.map', '.js'],
+        }),
+    ],
     define: {
         $env: EnvMap[Env],
     },

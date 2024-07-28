@@ -10,6 +10,7 @@
 - [x] Redis
 - [x] mysql，redis联动API，数据一致性
 - [x] github访问统计svg
+- [x] 错误日志上报，sourcemap还原
 - [ ] 音视频
 
 

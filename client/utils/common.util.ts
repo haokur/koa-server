@@ -61,3 +61,13 @@ export function fmtDate(date: string | number | Date, format = 'yyyy-MM-dd hh:mm
     });
     return format;
 }
+
+// 复制文本
+export function copyText(val) {
+    const input = document.createElement('input');
+    input.value = val;
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('Copy');
+    document.body.removeChild(input);
+}

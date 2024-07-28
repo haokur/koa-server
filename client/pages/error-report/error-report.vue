@@ -60,7 +60,20 @@
                                     v-for="(stack, i) in currentLogInfo?.content.stacks"
                                     :key="i"
                                 >
-                                    * {{ stack }}
+                                    <div @click="handleStackClick(stack, i)">* {{ stack }}</div>
+                                    <div class="stack-item__source" v-if="matchStack[i]">
+                                        <!-- <label class="label">Vscode链接：</label> -->
+                                        <span>{{ matchStack[i] }}</span>
+                                    </div>
+                                    <div
+                                        class="stack-item__source"
+                                        v-if="typeof githubLink[i] === 'string'"
+                                    >
+                                        <!-- <label class="label">github链接：</label> -->
+                                        <a :href="githubLink[i]" target="_blank">{{
+                                            githubLink[i]
+                                        }}</a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -77,6 +90,7 @@
 <script lang="ts" setup>
 import { onMounted, ref } from 'vue';
 import { IErrorItem } from '../../services/error.service';
+import { copyText } from '../../utils/common.util';
 
 declare const foo;
 
@@ -115,6 +129,91 @@ async function getLogList() {
 }
 function handleLogItemClick(item) {
     currentLogInfo.value = item;
+    matchStack.value = [];
+    githubLink.value = [];
+}
+
+function mockLinkClick(url) {
+    let el = document.createElement('a');
+    el.href = url;
+    el.target = '_blank';
+    document.body.appendChild(el);
+    el.click();
+    document.body.removeChild(el);
+}
+
+function resolve(...paths) {
+    const resolvedPath = paths.reduce((acc, path) => {
+        const segments = path.split('/');
+        segments.forEach((segment) => {
+            if (segment === '..') {
+                // Pop the last segment from the accumulator for ".."
+                acc.pop();
+            } else if (segment !== '.') {
+                // Push new segments onto the accumulator
+                acc.push(segment);
+            }
+        });
+        return acc;
+    }, []);
+
+    return resolvedPath.join('/');
+}
+
+/**
+ * vscode中打开文件对应行，不原生支持，将命令复制到剪切板，打开命令行粘贴执行
+ * code -g //Users/haokur/code/Github/koa-server/client/pages/error-report/error-report.vue:91:16
+ */
+function openFileLineByVscode(config) {
+    const sourceDir = `/Users/haokur/code/Github/koa-server/client/xxxx/xxxx`;
+    let { source, line, column } = config;
+    let localFilePath = '/' + resolve(sourceDir, source);
+    let withLinePath = `${localFilePath}:${line}:${column}`;
+    let vscodeCmdStr = `code -g ${withLinePath}`;
+    copyText(vscodeCmdStr);
+    // mockLinkClick(`vscode:${withLinePath}`);
+    return `code -g ${withLinePath}`;
+}
+
+/**
+ * 代码仓库中打开
+ * https://github.com/user/repo/blob/branch/file#L10
+ */
+function openFileLineByGithub(config) {
+    let { source, line } = config;
+    const sourceDir = `https://github.com/haokur/koa-server/blob/main/client/xxxx/xxxx`;
+    let urlPath = resolve(sourceDir, source);
+    const githubUrl = `${urlPath}#L${line}`;
+    // mockLinkClick(githubUrl);
+    return githubUrl;
+}
+
+/**
+ * 点击执行堆栈，定位到执行的位置
+ * vscode中只能终端使用命令：
+ * github代码定位到行
+ */
+const matchStack = ref<String[]>([]);
+const githubLink = ref<String[]>([]);
+async function handleStackClick(stack, index) {
+    console.log(stack, 'error-report.vue::122行');
+    let result = await fetch(`${$env.baseUrl}/log/parse-sourcemap?bundle_path=${stack}`);
+    let data = await result.json();
+    const vscodeCmdStr = openFileLineByVscode(data);
+    const githubUrlStr = openFileLineByGithub(data);
+    matchStack.value[index] = vscodeCmdStr;
+    githubLink.value[index] = githubUrlStr;
+    // openFileLineByGithub(data);
+
+    // github打开
+    // console.log(source, 'error-report.vue::134行');
+    // let localFilePath = resolve(sourceDir, source);
+    // console.log(localFilePath, 'error-report.vue::155行');
+    // // code -g //Users/haokur/code/Github/koa-server/client/pages/error-report/error-report.vue:91:16
+    // // https://github.com/octocat/Hello-World/blob/main/README.md#L10
+    // // mockLinkClick(`vscode:${localFilePath}:${line}:${column}`);
+    // console.log(`vscode:${localFilePath}:${line}:${column}`);
+    // mockLinkClick(`electron-starter:${localFilePath}`);
 }
 </script>
 <style lang="scss" scoped>
@@ -158,10 +257,6 @@ function handleLogItemClick(item) {
     }
 }
 .log {
-    &-list {
-    }
-    &-item {
-    }
     &-row {
         display: flex;
         margin-bottom: 6px;
@@ -169,13 +264,14 @@ function handleLogItemClick(item) {
             flex-shrink: 0;
             width: 120px;
         }
-        .content {
-        }
     }
 }
 .stack {
     &-item {
         margin-bottom: 4px;
+        &__source {
+            color: blue;
+        }
     }
 }
 </style>
