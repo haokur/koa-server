@@ -24,7 +24,7 @@ export default defineConfig({
         copyPlugin({
             from: 'client/dist/assets',
             to: '_sourcemaps/assets',
-            ext: ['.map', '.js'],
+            ext: ['.map'],
         }),
     ],
     define: {
