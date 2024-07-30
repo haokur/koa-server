@@ -11,6 +11,7 @@
 - [x] mysql，redis联动API，数据一致性
 - [x] github访问统计svg
 - [x] 错误日志上报，sourcemap还原
+- [x] 使用c++模块示例
 - [ ] 音视频
 
 
@@ -78,3 +79,11 @@ QueryService中实现的功能，使用QueryService自动处理redis缓存。
 - production 环境使用 .env.production.ini
 - node 启动的 process.env.NODE_ENV 变量注入，由 cross-env 提供兼容
 - .gitignore 已忽略各种环境的配置的提交，只留了配置模板
+
+##### c++模块代码目录 `src/cpp/modules`
+
+- 编译 nodejs 能使用的 .node 文件，根目录：npm run build:cpp
+- 统一在 src/cpp/index.ts 中定义导出类型和导出的模块
+- src/cpp/modules 下定义 c++ 代码
+- src/binding.gyp 中定义模块打包
+- 多个 sources 打包时会只有最后一个模块的方法，问题待确定

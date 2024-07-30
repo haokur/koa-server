@@ -2,6 +2,17 @@
 import { QueryService } from '../services/query.service';
 import { RedisService } from '../services/redis.service';
 import { SqlService } from '../services/sql.service';
+import { cppAddon, cppAddon2 } from '../cpp';
+
+/**测试node-c++模块 */
+async function TestCppModule() {
+    // console.log(cppAddon.method1('jack'));
+    // console.log(cppAddon.method2());
+    // console.log(cppAddon2.method3());
+    console.log(cppAddon, cppAddon2, 'xx23');
+    console.log(cppAddon2.add(1, 2));
+    return 'cpp is run';
+}
 
 /**测试添加表 */
 async function TestCreateTable() {
@@ -160,6 +171,7 @@ async function TestQuery() {
 
 export const TestRoutes = {
     '/test/mysql-redis-query': TestQuery,
+    '/test/cpp': TestCppModule,
     // '/test/table-create': TestCreateTable,
     // '/test/table-insert': TestTableInsert,
     // '/test/table-insert-many': TestTableInsertMany,

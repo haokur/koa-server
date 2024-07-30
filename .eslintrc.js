@@ -15,6 +15,7 @@ module.exports = {
     rules: {
         '@haokur/no-merge-conflict': 2,
         '@haokur/get-need-return': 2,
+        "@typescript-eslint/ban-ts-comment": 1,
         'no-alert': 2,
         semi: [2, 'always'], // 语句强制分号结尾
         'comma-dangle': [
