@@ -6,14 +6,21 @@
         "dist/**",
         "client/dist/**",
         "_sourcemaps/**",
-        "_temp/**"
+        "_temp/**",
+        "src/cpp/**",
+        "src/rusts/native/target/**",
+        "src/rusts/native/artifacts.json",
+        "src/rusts/native/Cargo.lock",
+        "src/rusts/native/Cargo.toml"
     ],
     "words": [
         "camo",
         "datetime",
         "EDITMSG",
         "haokur",
+        "proto",
         "tinyint",
+        "tlsv",
         "Vals",
         "varchar",
         "Webrtc",

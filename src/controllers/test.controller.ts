@@ -3,6 +3,7 @@ import { QueryService } from '../services/query.service';
 import { RedisService } from '../services/redis.service';
 import { SqlService } from '../services/sql.service';
 import { cppAddon, cppAddon2 } from '../cpp';
+import { rModules } from '../rusts';
 
 /**测试node-c++模块 */
 async function TestCppModule() {
@@ -11,6 +12,7 @@ async function TestCppModule() {
     // console.log(cppAddon2.method3());
     console.log(cppAddon, cppAddon2, 'xx23');
     console.log(cppAddon2.add(1, 2));
+    console.log(rModules.sayHello(), 'test.controller.ts::15行');
     return 'cpp is run';
 }
 

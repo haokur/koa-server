@@ -16,4 +16,8 @@ src/cpp/build/Makefile
 src/cpp/build/Release/.deps/*
 src/cpp/build/Release/obj.target/*
 
+src/rusts/native/target/*
+src/rusts/native/artifacts.json
+src/rusts/native/Cargo.lock
+
 

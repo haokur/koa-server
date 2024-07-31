@@ -16,6 +16,7 @@
     "build:map": "vite build --config ./client/vite.config-map.ts",
     "build:serve": "tsc",
     "build:cpp": "cd src/cpp && node-gyp clean && node-gyp configure && node-gyp build",
+    "build:rust": "cd src/rusts && neon build",
     "preview:serve": "cross-env NODE_ENV=production node ./dist/main.js",
     "pm2:serve": "pm2 start npm --name koa-server-8666 -- run preview:serve"
   },

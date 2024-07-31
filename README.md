@@ -12,6 +12,7 @@
 - [x] github访问统计svg
 - [x] 错误日志上报，sourcemap还原
 - [x] 使用c++模块示例
+- [x] 使用rust模块示例
 - [ ] 音视频
 
 
@@ -87,3 +88,13 @@ QueryService中实现的功能，使用QueryService自动处理redis缓存。
 - src/cpp/modules 下定义 c++ 代码
 - src/binding.gyp 中定义模块打包
 - 多个 sources 打包时会只有最后一个模块的方法，问题待确定
+
+##### 使用 rust 模块，目录 `src/rusts/native`
+
+- 安装 rust 环境：
+    - 方式1. `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh`
+    - 方式2. `brew install rust`
+    - 方式3. `https://forge.rust-lang.org/infra/other-installation-methods.html` 找到对应系统安装包后，下载后安装
+- rust 模块源码，在 `src/rusts/native/src/` 下
+- rust 编译，命令行运行 `npm run build:rust`
+- 在 `src/rusts/index.ts` 中定义方法类型，且导出 rust 的方法
